@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#5a7cff">
+  <title>Servicio de Predicacion</title>
+  <link rel="icon" href="./icons/app-icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Organizacion personal</p>
+        <h1>Servicio de predicacion y seguimiento</h1>
+        <p class="hero-text">
+          Registra horas, controla creditos, organiza revisitas y recibe recordatorios
+          desde una sola aplicacion guardada localmente en tu navegador.
+        </p>
+      </div>
+      <div class="hero-summary">
+        <div class="summary-chip">
+          <span>Predicacion (mes)</span>
+          <strong id="heroPreachingMonth">0 h</strong>
+        </div>
+        <div class="summary-chip credit">
+          <span>Credito (mes)</span>
+          <strong id="heroCreditMonth">0 h</strong>
+        </div>
+        <div class="summary-chip combined">
+          <span>Total combinado</span>
+          <strong id="heroCombinedMonth">0 h</strong>
+        </div>
+        <div class="summary-chip goal">
+          <label class="goal-label" for="monthlyGoalInput">
+            <span>Meta mensual (horas)</span>
+            <input type="number" id="monthlyGoalInput" min="0" step="0.25" placeholder="Ej. 60">
+          </label>
+          <div class="goal-progress-wrap">
+            <div class="goal-progress-bar" id="heroGoalBar"></div>
+          </div>
+          <strong id="heroGoalProgress">Sin meta definida</strong>
+        </div>
+      </div>
+    </header>
+
+    <nav class="tabs" aria-label="Secciones principales">
+      <button class="tab-button active" data-tab="predicacion">Predicacion</button>
+      <button class="tab-button" data-tab="credito">Horas de credito</button>
+      <button class="tab-button" data-tab="seguimiento">Revisitas y estudios</button>
+    </nav>
+
+    <main class="tab-panels">
+      <section class="tab-panel active" id="predicacion">
+        <div class="panel-grid">
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <p class="card-kicker">Nuevo registro</p>
+                <h2>Horas de predicacion</h2>
+              </div>
+            </div>
+
+            <form id="preachingForm" class="form-grid">
+              <input type="hidden" id="preachingId">
+
+              <label>
+                <span>Fecha</span>
+                <input type="date" id="preachingDate" required>
+              </label>
+
+              <label>
+                <span>Horas predicadas</span>
+                <input type="number" id="preachingHours" min="0" step="0.25" placeholder="Ej. 2.5" required>
+              </label>
+
+              <label>
+                <span>Momento del dia</span>
+                <select id="preachingShift" required>
+                  <option value="manana">Manana</option>
+                  <option value="tarde">Tarde</option>
+                  <option value="noche">Noche</option>
+                </select>
+              </label>
+
+              <div class="form-actions">
+                <button type="submit" class="primary-button">Guardar registro</button>
+                <button type="button" id="preachingCancelEdit" class="secondary-button hidden">Cancelar edicion</button>
+              </div>
+            </form>
+          </article>
+
+          <article class="card">
+            <div class="card-header row-wrap">
+              <div>
+                <p class="card-kicker">Filtros y resumen</p>
+                <h2>Vista de predicacion</h2>
+              </div>
+              <div class="filter-inline">
+                <label>
+                  <span>Mes</span>
+                  <input type="month" id="preachingMonthFilter">
+                </label>
+                <label>
+                  <span>Semana</span>
+                  <input type="week" id="preachingWeekFilter">
+                </label>
+              </div>
+            </div>
+
+            <div class="stats-grid four-up">
+              <div class="stat-card">
+                <span>Hoy o fecha elegida</span>
+                <strong id="preachingDayTotal">0 h</strong>
+              </div>
+              <div class="stat-card">
+                <span>Total semanal (pred.)</span>
+                <strong id="preachingWeekTotal">0 h</strong>
+              </div>
+              <div class="stat-card">
+                <span>Total mensual (pred.)</span>
+                <strong id="preachingMonthTotal">0 h</strong>
+              </div>
+              <div class="stat-card combined-tone">
+                <span>Total mes (pred. + credito)</span>
+                <strong id="preachingCombinedMonthTotal">0 h</strong>
+              </div>
+            </div>
+
+            <div class="calendar-card">
+              <div class="calendar-header">
+                <div>
+                  <p class="card-kicker">Calendario visual</p>
+                  <h3 id="calendarTitle">Mes actual</h3>
+                </div>
+                <div class="calendar-legend">
+                  <span class="legend-item"><i class="dot preaching"></i> Predicacion</span>
+                  <span class="legend-item"><i class="dot credit"></i> Credito</span>
+                  <span class="legend-item"><i class="dot mixed"></i> Ambos</span>
+                  <span class="legend-item">Pulsa un dia para registrar o editar</span>
+                </div>
+              </div>
+              <div class="calendar-weekdays" id="calendarWeekdays"></div>
+              <div class="calendar-grid" id="calendarGrid"></div>
+            </div>
+          </article>
+        </div>
+
+        <article class="card">
+          <div class="card-header">
+            <div>
+              <p class="card-kicker">Historial</p>
+              <h2>Todos los registros de predicacion</h2>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Horas</th>
+                  <th>Momento</th>
+                  <th>Tipo</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="preachingTableBody"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <section class="tab-panel" id="credito">
+        <div class="panel-grid two-columns">
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <p class="card-kicker">Registro independiente</p>
+                <h2>Horas de credito</h2>
+              </div>
+            </div>
+
+            <form id="creditForm" class="form-grid">
+              <input type="hidden" id="creditId">
+
+              <label>
+                <span>Fecha</span>
+                <input type="date" id="creditDate" required>
+              </label>
+
+              <label>
+                <span>Horas de credito</span>
+                <input type="number" id="creditHours" min="0" step="0.25" placeholder="Ej. 1.5" required>
+              </label>
+
+              <div class="form-actions">
+                <button type="submit" class="primary-button">Guardar credito</button>
+                <button type="button" id="creditCancelEdit" class="secondary-button hidden">Cancelar edicion</button>
+              </div>
+            </form>
+          </article>
+
+          <article class="card">
+            <div class="card-header row-wrap">
+              <div>
+                <p class="card-kicker">Totales acumulados</p>
+                <h2>Resumen de credito</h2>
+              </div>
+              <div class="filter-inline">
+                <label>
+                  <span>Mes</span>
+                  <input type="month" id="creditMonthFilter">
+                </label>
+                <label>
+                  <span>Semana</span>
+                  <input type="week" id="creditWeekFilter">
+                </label>
+              </div>
+            </div>
+
+            <div class="stats-grid three-up">
+              <div class="stat-card credit-tone">
+                <span>Credito semanal</span>
+                <strong id="creditWeekTotal">0 h</strong>
+              </div>
+              <div class="stat-card credit-tone">
+                <span>Credito mensual</span>
+                <strong id="creditMonthTotal">0 h</strong>
+              </div>
+              <div class="stat-card combined-tone">
+                <span>Total mes (pred. + credito)</span>
+                <strong id="creditCombinedMonthTotal">0 h</strong>
+              </div>
+            </div>
+
+            <div class="info-box">
+              <strong>Totales combinados</strong>
+              <p>
+                Las horas de predicacion y de credito se suman en el total combinado del mes.
+                La meta mensual se configura arriba en el resumen principal.
+              </p>
+            </div>
+          </article>
+        </div>
+
+        <article class="card">
+          <div class="card-header">
+            <div>
+              <p class="card-kicker">Historial</p>
+              <h2>Todos los registros de credito</h2>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Horas</th>
+                  <th>Tipo</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="creditTableBody"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <section class="tab-panel" id="seguimiento">
+        <div class="panel-grid">
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <p class="card-kicker">Nuevo seguimiento</p>
+                <h2>Revisitas o estudios biblicos</h2>
+              </div>
+            </div>
+
+            <form id="followupForm" class="form-grid">
+              <input type="hidden" id="followupId">
+
+              <label>
+                <span>Nombre de la persona</span>
+                <input type="text" id="followupName" placeholder="Nombre completo" required>
+              </label>
+
+              <label>
+                <span>Direccion</span>
+                <input type="text" id="followupAddress" placeholder="Calle, numero o referencia" required>
+              </label>
+
+              <label class="full-span">
+                <span>Detalles o notas</span>
+                <textarea id="followupNotes" rows="4" placeholder="Observaciones, tema conversado, punto a retomar"></textarea>
+              </label>
+
+              <label>
+                <span>Dia de regreso</span>
+                <input type="date" id="followupReturnDate" required>
+              </label>
+
+              <label>
+                <span>Hora de regreso</span>
+                <input type="time" id="followupReturnTime" required>
+              </label>
+
+              <label>
+                <span>Tipo de seguimiento</span>
+                <select id="followupType" required>
+                  <option value="revisita">Revisita</option>
+                  <option value="estudio biblico">Estudio biblico</option>
+                </select>
+              </label>
+
+              <div class="form-actions full-span">
+                <button type="submit" class="primary-button">Guardar seguimiento</button>
+                <button type="button" id="followupCancelEdit" class="secondary-button hidden">Cancelar edicion</button>
+              </div>
+            </form>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <p class="card-kicker">Recordatorios</p>
+                <h2>Notificaciones automáticas</h2>
+              </div>
+            </div>
+
+            <div class="notification-panel">
+              <p>
+                Recordatorios de revisitas: el dia anterior (9:00), el dia del regreso (8:00) y a la hora
+                exacta del regreso. Activa los avisos del navegador y manten la pagina abierta o en segundo plano.
+              </p>
+              <div class="notification-status" aria-live="polite">
+                <span class="status-pill" id="notificationStatusPill">Internas activas</span>
+                <p id="notificationStatusText">Los recordatorios visuales ya estan activos dentro de la app.</p>
+              </div>
+              <div class="form-actions">
+                <button type="button" id="enableNotifications" class="primary-button">Activar avisos del navegador</button>
+                <button type="button" id="checkRemindersNow" class="secondary-button">Comprobar recordatorios</button>
+              </div>
+              <div class="info-box">
+                <strong>Informe y respaldo</strong>
+                <p>
+                  Exporta el informe PDF del mes (filtro de Predicacion) o un JSON con todos tus datos.
+                  Usa Importar JSON para restaurar una copia guardada antes.
+                </p>
+                <div class="form-actions">
+                  <button type="button" id="exportPdfButton" class="primary-button">Exportar PDF del mes</button>
+                  <button type="button" id="exportJsonButton" class="secondary-button">Exportar JSON</button>
+                  <label class="import-label secondary-button">
+                    Importar JSON
+                    <input type="file" id="importDataInput" accept="application/json,.json" hidden>
+                  </label>
+                </div>
+              </div>
+              <div class="info-box warning">
+                <strong>Importante</strong>
+                <p>
+                  Los avisos programados funcionan si la URL de Render sigue abierta (pestaña o app del navegador).
+                  Si cierras el navegador por completo, al volver a entrar se revisan los recordatorios pendientes.
+                </p>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <article class="card">
+          <div class="card-header">
+            <div>
+              <p class="card-kicker">Agenda</p>
+              <h2>Lista de revisitas y estudios</h2>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Persona</th>
+                  <th>Direccion</th>
+                  <th>Detalles</th>
+                  <th>Regreso</th>
+                  <th>Tipo</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="followupTableBody"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <div id="toastRegion" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+
+  <dialog id="dayEditorModal" class="day-modal">
+    <div class="day-modal-content">
+      <header class="day-modal-header">
+        <div>
+          <p class="card-kicker">Registro del dia</p>
+          <h2 id="dayEditorTitle">Fecha</h2>
+        </div>
+        <button type="button" class="secondary-button" id="dayEditorClose" aria-label="Cerrar">Cerrar</button>
+      </header>
+
+      <div class="day-modal-summary">
+        <div class="day-summary-item">
+          <span>Predicacion</span>
+          <strong id="dayEditorPreachingTotal">0 h</strong>
+        </div>
+        <div class="day-summary-item credit">
+          <span>Credito</span>
+          <strong id="dayEditorCreditTotal">0 h</strong>
+        </div>
+        <div class="day-summary-item combined">
+          <span>Total del dia</span>
+          <strong id="dayEditorCombinedTotal">0 h</strong>
+        </div>
+      </div>
+
+      <section class="day-editor-section">
+        <h3>Horas de predicacion</h3>
+        <div class="day-records-list" id="dayEditorPreachingList"></div>
+        <form id="dayEditorPreachingForm" class="form-grid compact">
+          <input type="hidden" id="dayEditorPreachingId">
+          <label>
+            <span>Horas</span>
+            <input type="number" id="dayEditorPreachingHours" min="0" step="0.25" required>
+          </label>
+          <label>
+            <span>Momento</span>
+            <select id="dayEditorPreachingShift" required>
+              <option value="manana">Manana</option>
+              <option value="tarde">Tarde</option>
+              <option value="noche">Noche</option>
+            </select>
+          </label>
+          <div class="form-actions full-span">
+            <button type="submit" class="primary-button" id="dayEditorPreachingSubmit">Agregar predicacion</button>
+            <button type="button" class="secondary-button hidden" id="dayEditorPreachingCancel">Cancelar</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="day-editor-section">
+        <h3>Horas de credito</h3>
+        <div class="day-records-list" id="dayEditorCreditList"></div>
+        <form id="dayEditorCreditForm" class="form-grid compact">
+          <input type="hidden" id="dayEditorCreditId">
+          <label class="full-span">
+            <span>Horas de credito</span>
+            <input type="number" id="dayEditorCreditHours" min="0" step="0.25" required>
+          </label>
+          <div class="form-actions full-span">
+            <button type="submit" class="primary-button" id="dayEditorCreditSubmit">Agregar credito</button>
+            <button type="button" class="secondary-button hidden" id="dayEditorCreditCancel">Cancelar</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </dialog>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

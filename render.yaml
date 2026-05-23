@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: system-registration
+    runtime: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=0, must-revalidate
