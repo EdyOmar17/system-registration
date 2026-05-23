@@ -890,60 +890,457 @@ td:last-child {
   }
 }
 
-@media (max-width: 980px) {
-  .hero,
+/* RESPONSIVE DESIGN - Mobile First Approach */
+
+/* Extra small devices (320px - 479px) */
+@media (max-width: 479px) {
+  .app-shell {
+    width: calc(100% - 16px);
+    margin: 12px auto 24px;
+  }
+
+  .hero {
+    padding: 16px;
+    border-radius: 16px;
+    gap: 12px;
+  }
+
+  h1 {
+    font-size: clamp(1.4rem, 3.5vw, 2rem);
+    margin-bottom: 8px;
+  }
+
+  .hero-text {
+    font-size: 0.9rem;
+  }
+
+  .hero-summary {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    min-width: auto;
+  }
+
+  .summary-chip {
+    padding: 12px 14px;
+  }
+
+  .summary-chip strong {
+    font-size: 1.2rem;
+  }
+
+  .tab-button {
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    flex: 1;
+    min-width: calc(50% - 5px);
+  }
+
   .panel-grid,
   .panel-grid.two-columns {
     grid-template-columns: 1fr;
-    display: grid;
+    gap: 12px;
   }
 
-  .hero-summary,
+  .card {
+    padding: 14px;
+    border-radius: 16px;
+    margin-bottom: 12px;
+  }
+
+  .card-header {
+    gap: 12px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .form-actions {
+    gap: 8px;
+  }
+
+  .primary-button,
+  .secondary-button,
+  .action-button {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    flex: 1;
+  }
+
   .stats-grid,
   .stats-grid.two-up,
   .stats-grid.three-up,
   .stats-grid.four-up {
     grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .stat-card {
+    padding: 14px;
+  }
+
+  .calendar-day,
+  .calendar-filler {
+    min-height: 70px;
+    padding: 8px;
+  }
+
+  .calendar-legend {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .legend-item {
+    width: 100%;
+  }
+
+  .day-modal {
+    width: calc(100% - 20px);
+    border-radius: 18px;
+  }
+
+  .day-modal-content {
+    padding: 16px;
+  }
+
+  .day-modal-summary {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .day-summary-item {
+    padding: 12px;
+  }
+
+  .table-wrapper {
+    font-size: 0.85rem;
+  }
+
+  th,
+  td {
+    padding: 10px 6px;
+  }
+
+  .type-pill {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
+
+  .filter-inline {
+    flex-direction: column;
+  }
+
+  .filter-inline label {
+    width: 100%;
+  }
+
+  .filter-inline label input,
+  .filter-inline label select {
+    width: 100%;
+  }
+
+  .toast-region {
+    top: auto;
+    right: 8px;
+    left: 8px;
+    bottom: 8px;
+    width: auto;
+  }
+
+  .toast {
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  .toast-title {
+    font-size: 0.9rem;
+  }
+
+  .toast-body {
+    font-size: 0.85rem;
+  }
+
+  .day-record-row {
+    padding: 8px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .day-record-actions {
+    gap: 4px;
+  }
+
+  .info-box {
+    padding: 12px 14px;
+    font-size: 0.9rem;
+  }
+
+  .goal-label {
+    gap: 6px;
+  }
+
+  .goal-label input {
+    padding: 8px 10px;
+  }
+}
+
+/* Small devices (480px - 639px) */
+@media (min-width: 480px) and (max-width: 639px) {
+  .app-shell {
+    width: calc(100% - 20px);
+    margin: 14px auto 28px;
+  }
+
+  .hero {
+    padding: 18px;
+    border-radius: 18px;
+    gap: 14px;
+  }
+
+  h1 {
+    font-size: clamp(1.5rem, 3.8vw, 2.2rem);
+  }
+
+  .hero-summary {
+    grid-template-columns: 1fr;
+    min-width: auto;
+  }
+
+  .tab-button {
+    padding: 10px 14px;
+    font-size: 0.9rem;
+  }
+
+  .panel-grid,
+  .panel-grid.two-columns {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .card {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .stats-grid,
+  .stats-grid.two-up,
+  .stats-grid.three-up,
+  .stats-grid.four-up {
+    grid-template-columns: 1fr;
+    gap: 11px;
+  }
+
+  .calendar-day,
+  .calendar-filler {
+    min-height: 75px;
+  }
+
+  .day-modal {
+    width: calc(100% - 24px);
   }
 
   .day-modal-summary {
     grid-template-columns: 1fr;
   }
-}
 
-@media (max-width: 720px) {
-  .app-shell {
-    width: min(100% - 20px, 1200px);
-    margin: 16px auto 24px;
+  .table-wrapper {
+    font-size: 0.88rem;
   }
 
-  .hero,
+  .toast-region {
+    width: calc(100% - 20px);
+    bottom: 10px;
+  }
+}
+
+/* Tablets pequeñas (640px - 767px) */
+@media (min-width: 640px) and (max-width: 767px) {
+  .app-shell {
+    width: min(100% - 24px, 1200px);
+    margin: 18px auto 32px;
+  }
+
+  .hero {
+    flex-direction: column;
+    padding: 20px;
+    gap: 16px;
+  }
+
+  h1 {
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+  }
+
+  .hero-summary {
+    grid-template-columns: repeat(2, 1fr);
+    min-width: auto;
+  }
+
+  .summary-chip.goal {
+    grid-column: 1 / -1;
+  }
+
+  .panel-grid,
+  .panel-grid.two-columns {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
   .card {
     padding: 18px;
     border-radius: 20px;
   }
 
-  .toast-region {
-    top: auto;
-    right: 10px;
-    left: 10px;
-    bottom: 10px;
-    width: auto;
-  }
-
-  .form-grid,
-  .stats-grid,
-  .stats-grid.two-up {
+  .form-grid {
     grid-template-columns: 1fr;
+    gap: 14px;
   }
 
-  .calendar-header,
-  .card-header {
-    flex-direction: column;
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stats-grid.three-up,
+  .stats-grid.four-up {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .calendar-day,
   .calendar-filler {
-    min-height: 78px;
+    min-height: 80px;
+  }
+
+  .day-modal-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Tablets medianas (768px - 979px) */
+@media (min-width: 768px) and (max-width: 979px) {
+  .hero {
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .hero-summary {
+    grid-template-columns: repeat(2, 1fr);
+    min-width: auto;
+  }
+
+  .panel-grid,
+  .panel-grid.two-columns {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stats-grid.three-up {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stats-grid.four-up {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .day-modal-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .table-wrapper {
+    font-size: 0.92rem;
+  }
+}
+
+/* Tablets grandes y pequeños escritorios (980px - 1199px) */
+@media (min-width: 980px) and (max-width: 1199px) {
+  .hero-summary {
+    min-width: 240px;
+  }
+
+  .panel-grid {
+    grid-template-columns: 1.1fr 1.4fr;
+  }
+
+  .stats-grid.three-up,
+  .stats-grid.four-up {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Escritorios grandes (1200px+) */
+@media (min-width: 1200px) {
+  .app-shell {
+    width: min(1200px, calc(100% - 32px));
+    margin: 32px auto 48px;
+  }
+
+  .hero {
+    padding: 28px;
+    border-radius: 28px;
+  }
+
+  .panel-grid {
+    grid-template-columns: 1.1fr 1.4fr;
+  }
+
+  .hero-summary {
+    min-width: 280px;
+  }
+
+  .stats-grid.three-up {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .stats-grid.four-up {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Mejoras adicionales para pantallas ultra-grandes (1400px+) */
+@media (min-width: 1400px) {
+  .app-shell {
+    width: 1340px;
+    margin: 40px auto 56px;
+  }
+
+  .hero {
+    padding: 32px;
+    gap: 32px;
+  }
+
+  h1 {
+    font-size: 3.2rem;
+  }
+
+  .hero-text {
+    max-width: 780px;
+    font-size: 1.1rem;
+  }
+
+  .card {
+    padding: 28px;
+  }
+
+  .form-grid {
+    gap: 20px;
+  }
+
+  input,
+  select,
+  textarea {
+    padding: 14px 16px;
   }
 }
