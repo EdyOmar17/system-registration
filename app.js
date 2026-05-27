@@ -1231,9 +1231,10 @@ async function handleImportData(event) {
 function handlePreachingSubmit(event) {
   event.preventDefault();
 
+  const date = document.getElementById("preachingDate").value;
   const saved = upsertPreachingRecord({
     editingId: state.editing.preachingId,
-    date: document.getElementById("preachingDate").value,
+    date: date,
     hours: Number.parseFloat(document.getElementById("preachingHours").value),
     shift: document.getElementById("preachingShift").value,
   });
@@ -1242,6 +1243,12 @@ function handlePreachingSubmit(event) {
     return;
   }
 
+  // Actualizar el filtro de mes al mes del registro nuevo
+  const monthValue = date.substring(0, 7);
+  state.filters.preachingMonth = monthValue;
+  document.getElementById("preachingMonthFilter").value = monthValue;
+  saveState();
+
   resetPreachingForm();
   renderAll();
 }
@@ -1249,15 +1256,22 @@ function handlePreachingSubmit(event) {
 function handleCreditSubmit(event) {
   event.preventDefault();
 
+  const date = document.getElementById("creditDate").value;
   const saved = upsertCreditRecord({
     editingId: state.editing.creditId,
-    date: document.getElementById("creditDate").value,
+    date: date,
     hours: Number.parseFloat(document.getElementById("creditHours").value),
   });
 
   if (!saved) {
     return;
   }
+
+  // Actualizar el filtro de mes al mes del registro nuevo
+  const monthValue = date.substring(0, 7);
+  state.filters.creditMonth = monthValue;
+  document.getElementById("creditMonthFilter").value = monthValue;
+  saveState();
 
   resetCreditForm();
   renderAll();
