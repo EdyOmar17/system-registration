@@ -1246,7 +1246,10 @@ function handlePreachingSubmit(event) {
   // Actualizar el filtro de mes al mes del registro nuevo
   const monthValue = date.substring(0, 7);
   state.filters.preachingMonth = monthValue;
-  document.getElementById("preachingMonthFilter").value = monthValue;
+  const monthFilter = document.getElementById("preachingMonthFilter");
+  if (monthFilter) {
+    monthFilter.value = monthValue;
+  }
   saveState();
 
   resetPreachingForm();
@@ -1270,7 +1273,10 @@ function handleCreditSubmit(event) {
   // Actualizar el filtro de mes al mes del registro nuevo
   const monthValue = date.substring(0, 7);
   state.filters.creditMonth = monthValue;
-  document.getElementById("creditMonthFilter").value = monthValue;
+  const monthFilter = document.getElementById("creditMonthFilter");
+  if (monthFilter) {
+    monthFilter.value = monthValue;
+  }
   saveState();
 
   resetCreditForm();
