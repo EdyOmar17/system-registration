@@ -4,6 +4,18 @@ Aplicación web para registrar horas de predicación, horas de crédito, revisit
 
 Este proyecto permite a los usuarios llevar un control personal de su actividad ministerial, generar informes en PDF y gestionar respaldos mediante exportación e importación de datos en formato JSON. Está diseñado como un sitio estático que se despliega fácilmente en Render usando Vite.
 
+## Características principales
+
+- **Modo oscuro completo**: Toggle para cambiar entre tema claro y oscuro con transiciones suaves y estilos optimizados para todos los componentes UI
+- **Registro de actividades**: Predicación, horas de crédito, revisitas y estudios bíblicos
+- **Estudio de la Biblia**: Seguimiento de lectura de libros y capítulos con notas y comentarios
+- **Recordatorios automáticos**: Notificaciones para revisitas y estudios bíblicos
+- **Historial completo**: Tablas con historial de registros en todas las secciones
+- **Modal de confirmación**: Diálogos personalizados para eliminaciones en lugar de alertas nativas
+- **Exportación e importación**: Generación de informes PDF y respaldos JSON
+- **Persistencia local**: Todos los datos se guardan en `localStorage` del navegador
+- **Diseño responsive**: Interfaz adaptada para diferentes tamaños de pantalla
+
 ## Qué hace el sistema
 
 - Registra actividades de predicación y seguimiento.
@@ -18,8 +30,10 @@ Este proyecto permite a los usuarios llevar un control personal de su actividad 
 1. El usuario agrega registros desde la interfaz web.
 2. El sistema guarda los datos directamente en `localStorage`.
 3. La aplicación lee los datos al cargar la página y muestra el historial.
-4. Los botones de exportación generan archivos PDF o JSON.
-5. El botón de importación restaura datos desde un JSON válido.
+4. El usuario puede alternar entre modo claro y oscuro usando el botón de tema.
+5. Las eliminaciones de registros muestran un modal de confirmación personalizado.
+6. Los botones de exportación generan archivos PDF o JSON.
+7. El botón de importación restaura datos desde un JSON válido.
 
 ## Diagrama de flujo
 
@@ -82,11 +96,14 @@ Abre la URL que muestra Vite (por ejemplo `http://localhost:5173`).
 ## Cómo usar la aplicación
 
 1. Abre la app en tu navegador.
-2. Ingresa tu nombre, fecha y el tipo de actividad (predicación, crédito, revisita o estudio bíblico).
-3. Guarda el registro y revisa el historial en la misma página.
-4. Usa el botón de exportar PDF para generar un reporte del mes.
-5. Usa el botón de exportar JSON para hacer una copia de seguridad de todos los datos.
-6. Para restaurar datos, importa un archivo JSON válido desde el botón de importación.
+2. Usa el botón de tema (sol/luna) en la esquina superior derecha para alternar entre modo claro y oscuro.
+3. Ingresa tu nombre, fecha y el tipo de actividad (predicación, crédito, revisita o estudio bíblico).
+4. Guarda el registro y revisa el historial en la misma página.
+5. Para eliminar registros, usa los botones de Editar/Eliminar en el historial (se mostrará un modal de confirmación).
+6. Usa el botón de exportar PDF para generar un reporte del mes.
+7. Usa el botón de exportar JSON para hacer una copia de seguridad de todos los datos.
+8. Para restaurar datos, importa un archivo JSON válido desde el botón de importación.
+9. En la sección de Estudio de la Biblia, marca capítulos como leídos y agrega notas personales.
 
 ## Despliegue en Render (sitio estático)
 
@@ -111,5 +128,6 @@ No hace falta base de datos ni variables de entorno.
 
 - Los registros viven en el navegador de cada dispositivo.
 - **Exportar PDF del mes:** informe con el nombre del mes.
-- **Exportar JSON:** copia completa de todos los datos.
+- **Exportar JSON:** copia completa de todos los datos (incluye preferencia de tema).
 - **Importar JSON:** restaura una copia de seguridad.
+- **Modo oscuro:** La preferencia de tema se guarda y se incluye en los respaldos JSON.

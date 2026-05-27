@@ -573,6 +573,26 @@
     </div>
   </dialog>
 
+  <dialog id="confirmModal" class="day-modal">
+    <div class="day-modal-content">
+      <header class="day-modal-header">
+        <div>
+          <p class="card-kicker">Confirmar acción</p>
+          <h2 id="confirmModalTitle">¿Estás seguro?</h2>
+        </div>
+      </header>
+
+      <div class="day-modal-body">
+        <p id="confirmModalMessage">Esta acción no se puede deshacer.</p>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="secondary-button" id="confirmModalCancel">Cancelar</button>
+        <button type="button" class="action-button delete" id="confirmModalConfirm">Eliminar</button>
+      </div>
+    </div>
+  </dialog>
+
   <script type="module" src="app.js"></script>
 </body>
 </html>

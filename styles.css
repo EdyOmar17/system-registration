@@ -266,6 +266,12 @@ body.dark-mode .tab-button {
   color: #fff;
 }
 
+body.dark-mode .tab-button.active {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(90, 124, 255, 0.4);
+}
+
 .tab-panel {
   display: none;
 }
@@ -442,6 +448,11 @@ body.dark-mode .action-button.delete {
   gap: 18px;
   max-height: calc(100vh - 32px);
   overflow-y: auto;
+}
+
+.day-modal-body {
+  color: var(--muted);
+  line-height: 1.6;
 }
 
 .day-modal-header {

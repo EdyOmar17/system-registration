@@ -118,6 +118,8 @@ document.addEventListener("DOMContentLoaded", () => {
   bindReminderActions();
   bindReminderVisibility();
   bindDataBackup();
+  bindTableActions();
+  bindConfirmModal();
   bindTheme();
   applyInitialRoute();
   renderNotificationStatus();
@@ -727,6 +729,81 @@ function bindDataBackup() {
   document.getElementById("importDataInput")?.addEventListener("change", handleImportData);
 }
 
+function bindTableActions() {
+  document.addEventListener("click", (e) => {
+    const button = e.target.closest("button[data-action]");
+    if (!button) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const { action, id, book, chapter } = button.dataset;
+
+    if (action === "edit-preaching") {
+      editPreaching(id);
+    } else if (action === "delete-preaching") {
+      showConfirmModal("Eliminar registro de predicación", "Se eliminará este registro de predicación. ¿Deseas continuar?", () => removePreaching(id));
+    } else if (action === "edit-credit") {
+      editCredit(id);
+    } else if (action === "delete-credit") {
+      showConfirmModal("Eliminar registro de crédito", "Se eliminará este registro de crédito. ¿Deseas continuar?", () => removeCredit(id));
+    } else if (action === "edit-followup") {
+      editFollowup(id);
+    } else if (action === "delete-followup") {
+      showConfirmModal("Eliminar seguimiento", "Se eliminará este seguimiento. ¿Deseas continuar?", () => removeFollowup(id));
+    } else if (action === "edit-bible") {
+      openChapterEditor(book, Number(chapter));
+    } else if (action === "delete-bible") {
+      showConfirmModal("Eliminar registro de lectura", `Se eliminará el registro de lectura para ${book} Capítulo ${chapter}. ¿Deseas continuar?`, () => removeBibleHistoryEntry(book, Number(chapter)));
+    }
+  });
+}
+
+let confirmCallback = null;
+
+function showConfirmModal(title, message, onConfirm) {
+  const modal = document.getElementById("confirmModal");
+  const titleElement = document.getElementById("confirmModalTitle");
+  const messageElement = document.getElementById("confirmModalMessage");
+  const confirmButton = document.getElementById("confirmModalConfirm");
+  const cancelButton = document.getElementById("confirmModalCancel");
+
+  titleElement.textContent = title;
+  messageElement.textContent = message;
+  confirmCallback = onConfirm;
+
+  modal.showModal();
+}
+
+function closeConfirmModal() {
+  const modal = document.getElementById("confirmModal");
+  modal.close();
+  confirmCallback = null;
+}
+
+function bindConfirmModal() {
+  const confirmButton = document.getElementById("confirmModalConfirm");
+  const cancelButton = document.getElementById("confirmModalCancel");
+  const modal = document.getElementById("confirmModal");
+
+  confirmButton.addEventListener("click", () => {
+    if (confirmCallback) {
+      confirmCallback();
+    }
+    closeConfirmModal();
+  });
+
+  cancelButton.addEventListener("click", () => {
+    closeConfirmModal();
+  });
+
+  modal.addEventListener("click", (event) => {
+    if (event.target === modal) {
+      closeConfirmModal();
+    }
+  });
+}
+
 function bindTheme() {
   const themeToggle = document.getElementById("themeToggle");
   if (!themeToggle) return;
@@ -1304,10 +1381,6 @@ function editFollowup(id) {
 }
 
 function removePreaching(id) {
-  if (!window.confirm("Se eliminara este registro de predicacion. Deseas continuar?")) {
-    return;
-  }
-
   state.preachingRecords = state.preachingRecords.filter((item) => item.id !== id);
   if (state.editing.preachingId === id) {
     resetPreachingForm();
@@ -1317,10 +1390,6 @@ function removePreaching(id) {
 }
 
 function removeCredit(id) {
-  if (!window.confirm("Se eliminara este registro de credito. Deseas continuar?")) {
-    return;
-  }
-
   state.creditRecords = state.creditRecords.filter((item) => item.id !== id);
   if (state.editing.creditId === id) {
     resetCreditForm();
@@ -1330,10 +1399,6 @@ function removeCredit(id) {
 }
 
 function removeFollowup(id) {
-  if (!window.confirm("Se eliminara este seguimiento. Deseas continuar?")) {
-    return;
-  }
-
   state.followUps = state.followUps.filter((item) => item.id !== id);
   Object.keys(state.reminderLog).forEach((key) => {
     if (key.startsWith(`${id}:`)) {
@@ -1579,31 +1644,6 @@ function renderTable(tableBody, rows, colspan) {
   tableBody.innerHTML = rows.length
     ? rows.join("")
     : `<tr><td colspan="${colspan}" class="empty-state">Aun no hay registros para mostrar.</td></tr>`;
-
-  tableBody.querySelectorAll("button[data-action]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const { action, id } = button.dataset;
-
-      if (action === "edit-preaching") {
-        editPreaching(id);
-      }
-      if (action === "delete-preaching") {
-        removePreaching(id);
-      }
-      if (action === "edit-credit") {
-        editCredit(id);
-      }
-      if (action === "delete-credit") {
-        removeCredit(id);
-      }
-      if (action === "edit-followup") {
-        editFollowup(id);
-      }
-      if (action === "delete-followup") {
-        removeFollowup(id);
-      }
-    });
-  });
 }
 
 function bindReminderVisibility() {
@@ -2315,25 +2355,9 @@ function renderBibleHistoryTable() {
       </tr>
     `;
   }).join("");
-  
-  tbody.querySelectorAll("button[data-action]").forEach(button => {
-    button.addEventListener("click", () => {
-      const { action, book, chapter } = button.dataset;
-      const chapterNum = Number(chapter);
-      if (action === "edit-bible") {
-        openChapterEditor(book, chapterNum);
-      } else if (action === "delete-bible") {
-        removeBibleHistoryEntry(book, chapterNum);
-      }
-    });
-  });
 }
 
 function removeBibleHistoryEntry(bookName, chapterNum) {
-  if (!window.confirm(`Se eliminará el registro de lectura para ${bookName} Capítulo ${chapterNum}. ¿Deseas continuar?`)) {
-    return;
-  }
-  
   if (state.bibleStudy.progress[bookName] && state.bibleStudy.progress[bookName][chapterNum]) {
     state.bibleStudy.progress[bookName][chapterNum] = {
       read: false,
@@ -2342,7 +2366,7 @@ function removeBibleHistoryEntry(bookName, chapterNum) {
     };
     saveState();
     renderBibleBooks();
-    
+
     // Si la vista de detalle de ese libro está activa, refrescarla también
     const detailViewHidden = document.getElementById("bibleBookDetailView").classList.contains("hidden");
     if (!detailViewHidden && activeBibleBook === bookName) {
