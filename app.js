@@ -118,6 +118,7 @@ document.addEventListener("DOMContentLoaded", () => {
   bindReminderActions();
   bindReminderVisibility();
   bindDataBackup();
+  bindTheme();
   applyInitialRoute();
   renderNotificationStatus();
   renderAll();
@@ -163,7 +164,8 @@ function loadState() {
         progress: {},
         reminderEnabled: false,
         reminderTime: "20:00"
-      }
+      },
+      theme: parsed.theme || "light"
     };
   } catch (error) {
     console.error("No se pudo leer el almacenamiento local:", error);
@@ -193,7 +195,8 @@ function createDefaultState() {
       progress: {},
       reminderEnabled: false,
       reminderTime: "20:00"
-    }
+    },
+    theme: "light"
   };
 }
 
@@ -208,6 +211,7 @@ function saveState() {
       filters: state.filters,
       monthlyGoals: state.monthlyGoals,
       bibleStudy: state.bibleStudy,
+      theme: state.theme,
     })
   );
 }
@@ -723,6 +727,38 @@ function bindDataBackup() {
   document.getElementById("importDataInput")?.addEventListener("change", handleImportData);
 }
 
+function bindTheme() {
+  const themeToggle = document.getElementById("themeToggle");
+  if (!themeToggle) return;
+
+  // Apply saved theme on load
+  applyTheme(state.theme);
+
+  // Toggle theme on button click
+  themeToggle.addEventListener("click", () => {
+    const newTheme = state.theme === "light" ? "dark" : "light";
+    state.theme = newTheme;
+    saveState();
+    applyTheme(newTheme);
+  });
+}
+
+function applyTheme(theme) {
+  const body = document.body;
+  const sunIcon = document.querySelector(".theme-icon-sun");
+  const moonIcon = document.querySelector(".theme-icon-moon");
+
+  if (theme === "dark") {
+    body.classList.add("dark-mode");
+    sunIcon.classList.add("hidden");
+    moonIcon.classList.remove("hidden");
+  } else {
+    body.classList.remove("dark-mode");
+    sunIcon.classList.remove("hidden");
+    moonIcon.classList.add("hidden");
+  }
+}
+
 function exportJsonBackup() {
   const payload = {
     version: DATA_EXPORT_VERSION,
@@ -733,6 +769,7 @@ function exportJsonBackup() {
     filters: state.filters,
     monthlyGoals: state.monthlyGoals,
     bibleStudy: state.bibleStudy,
+    theme: state.theme,
   };
 
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });

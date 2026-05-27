@@ -17,6 +17,24 @@
   --radius: 18px;
 }
 
+body.dark-mode {
+  --bg: #1a1d2d;
+  --surface: #252942;
+  --surface-soft: #2d324d;
+  --text: #e8ecf4;
+  --muted: #9aa3b8;
+  --border: #3d4466;
+  --primary: #7a9aff;
+  --primary-soft: #3d4a6b;
+  --credit: #3db89a;
+  --credit-soft: #2d5a4a;
+  --combined: #8a6fe9;
+  --combined-soft: #4d3a6b;
+  --mixed: #aa8ef5;
+  --danger: #e06c6c;
+  --shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -26,6 +44,11 @@ body {
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   background: linear-gradient(180deg, #edf3fb 0%, var(--bg) 45%, #f8fafc 100%);
   color: var(--text);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+body.dark-mode {
+  background: linear-gradient(180deg, #1a1d2d 0%, var(--bg) 45%, #151825 100%);
 }
 
 button,
@@ -37,6 +60,47 @@ textarea {
 
 button {
   cursor: pointer;
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  border: 0;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  box-shadow: 0 4px 12px rgba(43, 71, 115, 0.15);
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.theme-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(43, 71, 115, 0.2);
+}
+
+body.dark-mode .theme-toggle {
+  background: rgba(45, 50, 77, 0.9);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .theme-toggle:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.theme-icon-sun,
+.theme-icon-moon {
+  display: block;
+}
+
+.hidden {
+  display: none;
 }
 
 .app-shell {
@@ -54,6 +118,12 @@ button {
   background: rgba(255, 255, 255, 0.86);
   backdrop-filter: blur(10px);
   box-shadow: var(--shadow);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+body.dark-mode .hero {
+  background: rgba(37, 41, 66, 0.86);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
 }
 
 .eyebrow,
@@ -120,11 +190,21 @@ h1 {
 .summary-chip.credit {
   background: var(--credit-soft);
   border-color: #c6efdf;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+body.dark-mode .summary-chip.credit {
+  border-color: var(--credit);
 }
 
 .summary-chip.combined {
   background: var(--combined-soft);
   border-color: #dacdff;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+body.dark-mode .summary-chip.combined {
+  border-color: var(--combined);
 }
 
 .summary-chip.goal {
@@ -173,6 +253,12 @@ h1 {
   border-radius: 999px;
   font-weight: 600;
   box-shadow: 0 6px 18px rgba(43, 71, 115, 0.08);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+body.dark-mode .tab-button {
+  background: rgba(45, 50, 77, 0.7);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
 }
 
 .tab-button.active {
@@ -205,6 +291,11 @@ h1 {
   border-radius: 24px;
   padding: 22px;
   box-shadow: var(--shadow);
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+body.dark-mode .card {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
 }
 
 .card-header {
@@ -250,7 +341,13 @@ textarea {
   background: #fbfdff;
   padding: 12px 14px;
   color: var(--text);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.3s ease;
+}
+
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea {
+  background: var(--surface-soft);
 }
 
 input:focus,
@@ -285,16 +382,32 @@ textarea:focus {
 .secondary-button {
   background: #eef3fa;
   color: var(--text);
+  transition: background 0.3s ease;
+}
+
+body.dark-mode .secondary-button {
+  background: var(--surface-soft);
 }
 
 .action-button.edit {
   background: #edf1ff;
   color: #4058c9;
+  transition: background 0.3s ease;
+}
+
+body.dark-mode .action-button.edit {
+  background: rgba(90, 124, 255, 0.2);
+  color: var(--primary);
 }
 
 .action-button.delete {
   background: #fdecec;
   color: var(--danger);
+  transition: background 0.3s ease;
+}
+
+body.dark-mode .action-button.delete {
+  background: rgba(211, 84, 84, 0.2);
 }
 
 .hidden {
@@ -315,6 +428,8 @@ textarea:focus {
   border-radius: 24px;
   padding: 0;
   box-shadow: 0 24px 60px rgba(43, 71, 115, 0.22);
+  background: var(--surface);
+  transition: background 0.3s ease;
 }
 
 .day-modal::backdrop {
@@ -351,14 +466,27 @@ textarea:focus {
   border-radius: 16px;
   border: 1px solid var(--border);
   background: var(--primary-soft);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+body.dark-mode .day-summary-item {
+  border-color: var(--primary);
 }
 
 .day-summary-item.credit {
   background: var(--credit-soft);
 }
 
+body.dark-mode .day-summary-item.credit {
+  border-color: var(--credit);
+}
+
 .day-summary-item.combined {
   background: var(--combined-soft);
+}
+
+body.dark-mode .day-summary-item.combined {
+  border-color: var(--combined);
 }
 
 .day-summary-item span {
@@ -388,6 +516,11 @@ textarea:focus {
   border-radius: 14px;
   border: 1px solid var(--border);
   background: #fbfdff;
+  transition: background 0.3s ease;
+}
+
+body.dark-mode .day-record-row {
+  background: var(--surface-soft);
 }
 
 .day-record-row p {
@@ -447,6 +580,11 @@ textarea:focus {
 .stat-card.combined-tone {
   background: var(--combined-soft);
   border-color: #dacdff;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+body.dark-mode .stat-card.combined-tone {
+  border-color: var(--combined);
 }
 
 .stat-card {
@@ -456,6 +594,11 @@ textarea:focus {
 .stat-card.credit-tone {
   background: var(--credit-soft);
   border-color: #c8ecdf;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+body.dark-mode .stat-card.credit-tone {
+  border-color: var(--credit);
 }
 
 .calendar-card {
@@ -463,6 +606,11 @@ textarea:focus {
   border-radius: 20px;
   padding: 18px;
   background: #fbfdff;
+  transition: background 0.3s ease;
+}
+
+body.dark-mode .calendar-card {
+  background: var(--surface-soft);
 }
 
 .calendar-header {
@@ -531,6 +679,11 @@ textarea:focus {
 
 .calendar-filler {
   background: rgba(232, 238, 247, 0.45);
+  transition: background 0.3s ease;
+}
+
+body.dark-mode .calendar-filler {
+  background: rgba(61, 68, 102, 0.3);
 }
 
 .calendar-day {
@@ -541,7 +694,11 @@ textarea:focus {
   flex-direction: column;
   gap: 8px;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.3s ease;
+}
+
+body.dark-mode .calendar-day {
+  background: var(--surface);
 }
 
 .calendar-day:hover {
@@ -625,6 +782,12 @@ td {
   padding: 14px 10px;
   border-bottom: 1px solid #e7edf5;
   vertical-align: top;
+  transition: border-color 0.3s ease;
+}
+
+body.dark-mode th,
+body.dark-mode td {
+  border-bottom-color: var(--border);
 }
 
 th {
@@ -655,16 +818,34 @@ td:last-child {
 .type-pill.preaching {
   background: var(--primary-soft);
   color: #3f58cd;
+  transition: background 0.3s ease;
+}
+
+body.dark-mode .type-pill.preaching {
+  background: rgba(90, 124, 255, 0.2);
+  color: var(--primary);
 }
 
 .type-pill.credit {
   background: var(--credit-soft);
   color: #1a7e66;
+  transition: background 0.3s ease;
+}
+
+body.dark-mode .type-pill.credit {
+  background: rgba(47, 165, 138, 0.2);
+  color: var(--credit);
 }
 
 .type-pill.followup {
   background: #f4ebff;
   color: #7a49d8;
+  transition: background 0.3s ease;
+}
+
+body.dark-mode .type-pill.followup {
+  background: rgba(154, 110, 243, 0.2);
+  color: var(--mixed);
 }
 
 .info-box {
@@ -681,11 +862,23 @@ td:last-child {
 .info-box.warning {
   background: #fff5e9;
   border-color: #f4d7a9;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+body.dark-mode .info-box.warning {
+  background: rgba(244, 215, 169, 0.15);
+  border-color: #f4d7a9;
 }
 
 .info-box.install-note {
   background: #f4f7ff;
   border-color: #d7e0ff;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+body.dark-mode .info-box.install-note {
+  background: rgba(90, 124, 255, 0.1);
+  border-color: var(--primary);
 }
 
 .notification-panel {
@@ -700,6 +893,11 @@ td:last-child {
   background: #f8fbff;
   border: 1px solid var(--border);
   border-radius: 18px;
+  transition: background 0.3s ease;
+}
+
+body.dark-mode .notification-status {
+  background: var(--surface-soft);
 }
 
 .notification-status p {
@@ -721,26 +919,53 @@ td:last-child {
 .status-pill.internal {
   background: var(--primary-soft);
   color: #3f58cd;
+  transition: background 0.3s ease;
+}
+
+body.dark-mode .status-pill.internal {
+  background: rgba(90, 124, 255, 0.2);
+  color: var(--primary);
 }
 
 .status-pill.granted {
   background: var(--credit-soft);
   color: #1a7e66;
+  transition: background 0.3s ease;
+}
+
+body.dark-mode .status-pill.granted {
+  background: rgba(47, 165, 138, 0.2);
+  color: var(--credit);
 }
 
 .status-pill.default {
   background: #fff5e9;
   color: #9a6200;
+  transition: background 0.3s ease;
+}
+
+body.dark-mode .status-pill.default {
+  background: rgba(244, 215, 169, 0.15);
 }
 
 .status-pill.denied {
   background: #fdecec;
   color: var(--danger);
+  transition: background 0.3s ease;
+}
+
+body.dark-mode .status-pill.denied {
+  background: rgba(211, 84, 84, 0.2);
 }
 
 .status-pill.ready {
   background: #eef3fa;
   color: #4a5b78;
+  transition: background 0.3s ease;
+}
+
+body.dark-mode .status-pill.ready {
+  background: var(--surface-soft);
 }
 
 .toast-region {
@@ -766,6 +991,12 @@ td:last-child {
   transform: translateY(-8px);
   opacity: 0;
   animation: toast-in 0.24s ease forwards;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+body.dark-mode .toast {
+  background: rgba(37, 41, 66, 0.96);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
 }
 
 .toast.reminder {
@@ -773,9 +1004,17 @@ td:last-child {
   background: linear-gradient(180deg, #fbf9ff 0%, #ffffff 100%);
 }
 
+body.dark-mode .toast.reminder {
+  background: linear-gradient(180deg, #2d324d 0%, var(--surface) 100%);
+}
+
 .toast.success {
   border-color: #c8ecdf;
   background: linear-gradient(180deg, #f4fffb 0%, #ffffff 100%);
+}
+
+body.dark-mode .toast.success {
+  background: linear-gradient(180deg, #2d5a4a 0%, var(--surface) 100%);
 }
 
 .toast.warning {
@@ -783,9 +1022,17 @@ td:last-child {
   background: linear-gradient(180deg, #fffaf2 0%, #ffffff 100%);
 }
 
+body.dark-mode .toast.warning {
+  background: linear-gradient(180deg, #5a4a2d 0%, var(--surface) 100%);
+}
+
 .toast.info {
   border-color: #ccd8ff;
   background: linear-gradient(180deg, #f6f8ff 0%, #ffffff 100%);
+}
+
+body.dark-mode .toast.info {
+  background: linear-gradient(180deg, #3d4a6b 0%, var(--surface) 100%);
 }
 
 .toast-header {
@@ -854,6 +1101,11 @@ td:last-child {
   font-weight: 600;
   color: var(--text);
   background: #eef3fa;
+  transition: background 0.3s ease;
+}
+
+body.dark-mode .toast-action {
+  background: var(--surface-soft);
 }
 
 .toast.is-leaving {
@@ -904,7 +1156,8 @@ td:last-child {
   .hero {
     padding: 16px;
     border-radius: 16px;
-    gap: 12px;
+    gap: 16px;
+    flex-direction: column;
   }
 
   h1 {
@@ -917,13 +1170,18 @@ td:last-child {
   }
 
   .hero-summary {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 10px;
     min-width: auto;
+    width: 100%;
   }
 
   .summary-chip {
     padding: 12px 14px;
+  }
+
+  .summary-chip.goal {
+    grid-column: 1 / -1;
   }
 
   .summary-chip strong {
@@ -1097,7 +1355,8 @@ td:last-child {
   .hero {
     padding: 18px;
     border-radius: 18px;
-    gap: 14px;
+    gap: 16px;
+    flex-direction: column;
   }
 
   h1 {
@@ -1105,8 +1364,13 @@ td:last-child {
   }
 
   .hero-summary {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
     min-width: auto;
+    width: 100%;
+  }
+
+  .summary-chip.goal {
+    grid-column: 1 / -1;
   }
 
   .tab-button {
@@ -1171,7 +1435,7 @@ td:last-child {
   .hero {
     flex-direction: column;
     padding: 20px;
-    gap: 16px;
+    gap: 18px;
   }
 
   h1 {
@@ -1181,6 +1445,7 @@ td:last-child {
   .hero-summary {
     grid-template-columns: repeat(2, 1fr);
     min-width: auto;
+    width: 100%;
   }
 
   .summary-chip.goal {
@@ -1226,12 +1491,17 @@ td:last-child {
 @media (min-width: 768px) and (max-width: 979px) {
   .hero {
     flex-direction: column;
-    gap: 18px;
+    gap: 20px;
   }
 
   .hero-summary {
     grid-template-columns: repeat(2, 1fr);
     min-width: auto;
+    width: 100%;
+  }
+
+  .summary-chip.goal {
+    grid-column: 1 / -1;
   }
 
   .panel-grid,
@@ -1380,14 +1650,27 @@ td:last-child {
   transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
+body.dark-mode .bible-book-card {
+  background-color: #3b5a8c;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
 .bible-book-card:hover {
   background-color: var(--primary);
   transform: translateY(-2px);
   box-shadow: 0 8px 16px rgba(90, 124, 255, 0.2);
 }
 
+body.dark-mode .bible-book-card:hover {
+  background-color: #5a7cff;
+}
+
 .bible-book-card.all-read {
   background-color: var(--credit); /* Green background when fully read */
+}
+
+body.dark-mode .bible-book-card.all-read {
+  background-color: #3db89a;
 }
 
 .bible-book-card.all-read:hover {
@@ -1397,6 +1680,10 @@ td:last-child {
 
 .bible-book-card.some-read {
   background-color: #3b5a8c; /* Slightly lighter blue when some chapters are read */
+}
+
+body.dark-mode .bible-book-card.some-read {
+  background-color: #4a6a9e;
 }
 
 .bible-book-card .progress-badge {
@@ -1431,10 +1718,18 @@ td:last-child {
   transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
 }
 
+body.dark-mode .chapter-button {
+  background-color: var(--surface-soft);
+}
+
 .chapter-button:hover {
   background-color: var(--primary-soft);
   border-color: var(--primary);
   transform: translateY(-2px);
+}
+
+body.dark-mode .chapter-button:hover {
+  background-color: rgba(90, 124, 255, 0.2);
 }
 
 .chapter-button.read {
@@ -1443,8 +1738,16 @@ td:last-child {
   border-color: var(--primary);
 }
 
+body.dark-mode .chapter-button.read {
+  background-color: var(--primary);
+}
+
 .chapter-button.read:hover {
   background-color: #486aeb;
+}
+
+body.dark-mode .chapter-button.read:hover {
+  background-color: #5a7cff;
 }
 
 .chapter-button .chapter-icons {
