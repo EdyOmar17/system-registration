@@ -866,7 +866,9 @@ td:last-child {
   padding: 22px;
 }
 
+
 @keyframes toast-in {
+
   from {
     opacity: 0;
     transform: translateY(-8px) scale(0.98);
@@ -1342,5 +1344,143 @@ td:last-child {
   select,
   textarea {
     padding: 14px 16px;
+  }
+}
+
+/* --- Bible Study Section Styles --- */
+.bible-section-title {
+  font-size: 1.2rem;
+  color: var(--text);
+  margin: 20px 0 10px;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 6px;
+  font-weight: 700;
+}
+
+.bible-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.bible-book-card {
+  background-color: #2b4773; /* A beautiful dark blue that matches the project design */
+  color: #ffffff;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.bible-book-card:hover {
+  background-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(90, 124, 255, 0.2);
+}
+
+.bible-book-card.all-read {
+  background-color: var(--credit); /* Green background when fully read */
+}
+
+.bible-book-card.all-read:hover {
+  background-color: #258c74;
+  box-shadow: 0 8px 16px rgba(47, 165, 138, 0.2);
+}
+
+.bible-book-card.some-read {
+  background-color: #3b5a8c; /* Slightly lighter blue when some chapters are read */
+}
+
+.bible-book-card .progress-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  opacity: 0.85;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 3px 7px;
+  border-radius: 8px;
+}
+
+.chapters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: 10px;
+}
+
+.chapter-button {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #eef3fa;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+}
+
+.chapter-button:hover {
+  background-color: var(--primary-soft);
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.chapter-button.read {
+  background-color: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+}
+
+.chapter-button.read:hover {
+  background-color: #486aeb;
+}
+
+.chapter-button .chapter-icons {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.chapter-icon-pencil {
+  width: 11px;
+  height: 11px;
+  fill: currentColor;
+  opacity: 0.8;
+}
+
+.chapter-icon-check {
+  width: 11px;
+  height: 11px;
+  fill: currentColor;
+  opacity: 0.95;
+}
+
+@media (max-width: 768px) {
+  .bible-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .bible-grid {
+    grid-template-columns: 1fr;
+  }
+  .chapters-grid {
+    grid-template-columns: repeat(auto-fill, minmax(54px, 1fr));
   }
 }

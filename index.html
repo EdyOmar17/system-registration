@@ -49,6 +49,7 @@
       <button class="tab-button active" data-tab="predicacion">Predicacion</button>
       <button class="tab-button" data-tab="credito">Horas de credito</button>
       <button class="tab-button" data-tab="seguimiento">Revisitas y estudios</button>
+      <button class="tab-button" data-tab="estudio">Estudio de la Biblia</button>
     </nav>
 
     <main class="tab-panels">
@@ -391,6 +392,83 @@
           </div>
         </article>
       </section>
+
+      <section class="tab-panel" id="estudio">
+        <!-- Vista principal de selección de libros -->
+        <div id="bibleBooksView" class="panel-grid two-columns">
+          <article class="card full-span">
+            <div class="card-header row-wrap">
+              <div>
+                <p class="card-kicker">Progreso espiritual</p>
+                <h2>Estudio de la Biblia</h2>
+              </div>
+              <div class="info-box install-note" style="margin: 0; padding: 10px 14px; border-radius: 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.9rem; cursor: pointer; color: var(--text);">
+                  <input type="checkbox" id="bibleReminderCheckbox" style="width: auto; margin: 0;">
+                  <span>Recordatorio diario</span>
+                </label>
+                <input type="time" id="bibleReminderTime" value="20:00" style="padding: 4px 8px; border-radius: 8px; width: auto; display: inline-block; font-size: 0.85rem;">
+                <button type="button" id="testBibleReminderButton" class="secondary-button" style="padding: 6px 10px; font-size: 0.8rem; border-radius: 8px; margin: 0;">Probar aviso</button>
+              </div>
+            </div>
+            <p class="hero-text" style="margin-bottom: 20px;">
+              Selecciona un libro para ver sus capítulos, registrar lecturas y guardar tus notas o comentarios personales.
+            </p>
+
+            <h3 class="bible-section-title">Escrituras Hebreoarameas</h3>
+            <div class="bible-grid" id="hebrewScripturesGrid"></div>
+
+            <h3 class="bible-section-title" style="margin-top: 30px;">Escrituras Griegas Cristianas</h3>
+            <div class="bible-grid" id="greekScripturesGrid"></div>
+          </article>
+
+          <!-- Historial de lectura (Agenda) -->
+          <article class="card full-span">
+            <div class="card-header">
+              <div>
+                <p class="card-kicker">Agenda y registros</p>
+                <h2>Historial de lectura de la Biblia</h2>
+              </div>
+            </div>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Fecha de lectura</th>
+                    <th>Libro</th>
+                    <th>Capítulo</th>
+                    <th>Comentarios o Notas</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="bibleHistoryTableBody"></tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+
+        <!-- Vista de capítulos de un libro seleccionado -->
+        <div id="bibleBookDetailView" class="panel-grid two-columns hidden">
+          <article class="card full-span">
+            <div class="card-header row-wrap" style="align-items: center;">
+              <div>
+                <button type="button" class="secondary-button" id="backToBooksButton" style="padding: 8px 14px; margin-bottom: 10px;">← Volver a los libros</button>
+                <h2 id="selectedBookTitle">El libro de Génesis</h2>
+              </div>
+              <div style="min-width: 200px; text-align: right;">
+                <span id="selectedBookProgressText" style="font-size: 0.9rem; color: var(--muted); font-weight: 600;">0 de 50 capítulos leídos (0%)</span>
+                <div class="goal-progress-wrap" style="margin-top: 6px;">
+                  <div class="goal-progress-bar" id="selectedBookProgressBar" style="width: 0%; background: linear-gradient(90deg, var(--credit), var(--primary));"></div>
+                </div>
+              </div>
+            </div>
+
+            <h3 style="margin-bottom: 16px;">Capítulos</h3>
+            <div class="chapters-grid" id="chaptersGrid"></div>
+          </article>
+        </div>
+      </section>
+
     </main>
   </div>
 
@@ -460,6 +538,34 @@
           </div>
         </form>
       </section>
+    </div>
+  </dialog>
+
+  <dialog id="chapterEditorModal" class="day-modal">
+    <div class="day-modal-content">
+      <header class="day-modal-header">
+        <div>
+          <p class="card-kicker" id="chapterModalBookName">Génesis</p>
+          <h2 id="chapterModalTitle">Capítulo 1</h2>
+        </div>
+        <button type="button" class="secondary-button" id="chapterModalClose" aria-label="Cerrar">Cerrar</button>
+      </header>
+
+      <form id="chapterEditorForm" class="form-grid compact">
+        <label class="full-span" style="display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none;">
+          <input type="checkbox" id="chapterModalReadCheck" style="width: auto; margin: 0;">
+          <span style="font-weight: 600; font-size: 1.05rem; color: var(--text);">Marcar como leído</span>
+        </label>
+
+        <label class="full-span">
+          <span>Notas o comentarios de lo aprendido</span>
+          <textarea id="chapterModalComment" rows="5" placeholder="¿Qué aprendiste en este capítulo o qué punto te llamó la atención?"></textarea>
+        </label>
+
+        <div class="form-actions full-span">
+          <button type="submit" class="primary-button" style="width: 100%;">Guardar cambios</button>
+        </div>
+      </form>
     </div>
   </dialog>
 

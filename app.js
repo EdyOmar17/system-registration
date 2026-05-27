@@ -22,6 +22,82 @@ const REMINDER_CATCHUP_MS = 36 * 60 * 60 * 1000;
 const DAY_BEFORE_REMINDER_HOUR = 9;
 const RETURN_DAY_REMINDER_HOUR = 8;
 
+const BIBLE_BOOKS = {
+  hebreoarameas: [
+    { name: "Génesis", chapters: 50 },
+    { name: "Éxodo", chapters: 40 },
+    { name: "Levítico", chapters: 27 },
+    { name: "Números", chapters: 36 },
+    { name: "Deuteronomio", chapters: 34 },
+    { name: "Josué", chapters: 24 },
+    { name: "Jueces", chapters: 21 },
+    { name: "Rut", chapters: 4 },
+    { name: "1 Samuel", chapters: 31 },
+    { name: "2 Samuel", chapters: 24 },
+    { name: "1 Reyes", chapters: 22 },
+    { name: "2 Reyes", chapters: 25 },
+    { name: "1 Crónicas", chapters: 29 },
+    { name: "2 Crónicas", chapters: 36 },
+    { name: "Esdras", chapters: 10 },
+    { name: "Nehemías", chapters: 13 },
+    { name: "Ester", chapters: 10 },
+    { name: "Job", chapters: 42 },
+    { name: "Salmos", chapters: 150 },
+    { name: "Proverbios", chapters: 31 },
+    { name: "Eclesiastés", chapters: 12 },
+    { name: "El Cantar de los Cantares", chapters: 8 },
+    { name: "Isaías", chapters: 66 },
+    { name: "Jeremías", chapters: 52 },
+    { name: "Lamentaciones", chapters: 5 },
+    { name: "Ezequiel", chapters: 48 },
+    { name: "Daniel", chapters: 12 },
+    { name: "Oseas", chapters: 14 },
+    { name: "Joel", chapters: 3 },
+    { name: "Amós", chapters: 9 },
+    { name: "Abdías", chapters: 1 },
+    { name: "Jonás", chapters: 4 },
+    { name: "Miqueas", chapters: 7 },
+    { name: "Nahúm", chapters: 3 },
+    { name: "Habacuc", chapters: 3 },
+    { name: "Sofonías", chapters: 3 },
+    { name: "Hageo", chapters: 2 },
+    { name: "Zacarías", chapters: 14 },
+    { name: "Malaquías", chapters: 4 }
+  ],
+  griegas: [
+    { name: "Mateo", chapters: 28 },
+    { name: "Marcos", chapters: 16 },
+    { name: "Lucas", chapters: 24 },
+    { name: "Juan", chapters: 21 },
+    { name: "Hechos", chapters: 28 },
+    { name: "Romanos", chapters: 16 },
+    { name: "1 Corintios", chapters: 16 },
+    { name: "2 Corintios", chapters: 13 },
+    { name: "Gálatas", chapters: 6 },
+    { name: "Efesios", chapters: 6 },
+    { name: "Filipenses", chapters: 4 },
+    { name: "Colosenses", chapters: 4 },
+    { name: "1 Tesalonicenses", chapters: 5 },
+    { name: "2 Tesalonicenses", chapters: 3 },
+    { name: "1 Timoteo", chapters: 6 },
+    { name: "2 Timoteo", chapters: 4 },
+    { name: "Tito", chapters: 3 },
+    { name: "Filemón", chapters: 1 },
+    { name: "Hebreos", chapters: 13 },
+    { name: "Santiago", chapters: 5 },
+    { name: "1 Pedro", chapters: 5 },
+    { name: "2 Pedro", chapters: 3 },
+    { name: "1 Juan", chapters: 5 },
+    { name: "2 Juan", chapters: 1 },
+    { name: "3 Juan", chapters: 1 },
+    { name: "Judas", chapters: 1 },
+    { name: "Apocalipsis", chapters: 22 }
+  ]
+};
+
+let activeBibleBook = null;
+let activeBibleChapter = null;
+
 const state = loadState();
 
 let reminderIntervalId = null;
@@ -30,6 +106,7 @@ const scheduledReminderTimeouts = [];
 let dayEditorDate = null;
 let dayEditorEditingPreachingId = null;
 let dayEditorEditingCreditId = null;
+let bibleReminderTimeoutId = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   initializeDefaults();
@@ -47,6 +124,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initializeNotificationSupport();
   startReminderLoop();
   checkFollowupReminders(false);
+  bindBibleStudy();
+  scheduleAllBibleReminders();
 });
 
 function loadState() {
@@ -76,6 +155,15 @@ function loadState() {
       },
       monthlyGoals:
         parsed.monthlyGoals && typeof parsed.monthlyGoals === "object" ? parsed.monthlyGoals : {},
+      bibleStudy: parsed.bibleStudy && typeof parsed.bibleStudy === "object" ? {
+        progress: parsed.bibleStudy.progress && typeof parsed.bibleStudy.progress === "object" ? parsed.bibleStudy.progress : {},
+        reminderEnabled: !!parsed.bibleStudy.reminderEnabled,
+        reminderTime: parsed.bibleStudy.reminderTime || "20:00"
+      } : {
+        progress: {},
+        reminderEnabled: false,
+        reminderTime: "20:00"
+      }
     };
   } catch (error) {
     console.error("No se pudo leer el almacenamiento local:", error);
@@ -101,6 +189,11 @@ function createDefaultState() {
       followupId: null,
     },
     monthlyGoals: {},
+    bibleStudy: {
+      progress: {},
+      reminderEnabled: false,
+      reminderTime: "20:00"
+    }
   };
 }
 
@@ -114,6 +207,7 @@ function saveState() {
       reminderLog: state.reminderLog,
       filters: state.filters,
       monthlyGoals: state.monthlyGoals,
+      bibleStudy: state.bibleStudy,
     })
   );
 }
@@ -499,18 +593,38 @@ function applyInitialRoute() {
 }
 
 function bindTabs() {
-  const tabButtons = document.querySelectorAll(".tab-button");
+  const nav = document.querySelector(".tabs");
   const tabPanels = document.querySelectorAll(".tab-panel");
 
-  tabButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      tabButtons.forEach((item) => item.classList.remove("active"));
-      tabPanels.forEach((panel) => panel.classList.remove("active"));
+  if (!nav) return;
 
-      button.classList.add("active");
-      document.getElementById(button.dataset.tab).classList.add("active");
-    });
+  // Delegación de eventos: un listener para todas las pestañas
+  nav.addEventListener("click", (e) => {
+    const button = e.target.closest(".tab-button");
+    if (!button) return;
+
+    // Actualizar estados
+    nav.querySelectorAll(".tab-button").forEach((b) => b.classList.remove("active"));
+    tabPanels.forEach((panel) => panel.classList.remove("active"));
+
+    button.classList.add("active");
+    const panel = document.getElementById(button.dataset.tab);
+    if (panel) panel.classList.add("active");
+
+    // Actualizar hash para deep-linking sin añadir al historial
+    try {
+      history.replaceState(null, "", `#${button.dataset.tab}`);
+    } catch (e) {
+      // ignore
+    }
   });
+
+  // Si hay hash al cargar, activar la pestaña correspondiente
+  const initialHash = window.location.hash.replace("#", "");
+  if (initialHash) {
+    const initialBtn = document.querySelector(`.tab-button[data-tab="${initialHash}"]`);
+    if (initialBtn) initialBtn.click();
+  }
 }
 
 function bindForms() {
@@ -618,6 +732,7 @@ function exportJsonBackup() {
     followUps: state.followUps,
     filters: state.filters,
     monthlyGoals: state.monthlyGoals,
+    bibleStudy: state.bibleStudy,
   };
 
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
@@ -962,6 +1077,15 @@ async function handleImportData(event) {
       parsed.monthlyGoals && typeof parsed.monthlyGoals === "object"
         ? parsed.monthlyGoals
         : createDefaultState().monthlyGoals;
+    state.bibleStudy = parsed.bibleStudy && typeof parsed.bibleStudy === "object" ? {
+      progress: parsed.bibleStudy.progress && typeof parsed.bibleStudy.progress === "object" ? parsed.bibleStudy.progress : {},
+      reminderEnabled: !!parsed.bibleStudy.reminderEnabled,
+      reminderTime: parsed.bibleStudy.reminderTime || "20:00"
+    } : {
+      progress: {},
+      reminderEnabled: false,
+      reminderTime: "20:00"
+    };
 
     saveState();
     resetPreachingForm();
@@ -1193,6 +1317,7 @@ function renderAll() {
   renderCreditSection();
   renderFollowups();
   renderNotificationStatus();
+  renderBibleBooks();
 }
 
 function renderHeroSummary() {
@@ -1626,6 +1751,7 @@ function checkFollowupReminders(forceManualCheck) {
   }
 
   scheduleAllFollowupReminders();
+  checkBibleReadingReminder();
 }
 
 function maybeNotify({ title, body, badge, tone, logKey }) {
@@ -1870,3 +1996,424 @@ function escapeHtml(value) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
 }
+
+/* --- Bible Study Logic --- */
+
+function bindBibleStudy() {
+  const reminderCheckbox = document.getElementById("bibleReminderCheckbox");
+  const reminderTimeInput = document.getElementById("bibleReminderTime");
+  const testReminderButton = document.getElementById("testBibleReminderButton");
+
+  if (reminderCheckbox && reminderTimeInput) {
+    reminderCheckbox.checked = state.bibleStudy.reminderEnabled;
+    reminderTimeInput.value = state.bibleStudy.reminderTime;
+    
+    reminderCheckbox.addEventListener("change", (e) => {
+      state.bibleStudy.reminderEnabled = e.target.checked;
+      saveState();
+      renderNotificationStatus();
+      scheduleAllBibleReminders();
+    });
+    
+    reminderTimeInput.addEventListener("change", (e) => {
+      state.bibleStudy.reminderTime = e.target.value;
+      saveState();
+      scheduleAllBibleReminders();
+    });
+  }
+
+  if (testReminderButton) {
+    testReminderButton.addEventListener("click", () => {
+      if ("Notification" in window && Notification.permission === "default") {
+        Notification.requestPermission().then(() => {
+          renderNotificationStatus();
+          sendTestBibleReminder();
+        });
+      } else {
+        sendTestBibleReminder();
+      }
+    });
+  }
+
+  document.getElementById("backToBooksButton")?.addEventListener("click", () => {
+    document.getElementById("bibleBookDetailView").classList.add("hidden");
+    document.getElementById("bibleBooksView").classList.remove("hidden");
+    renderBibleBooks();
+  });
+
+  document.getElementById("chapterModalClose")?.addEventListener("click", () => {
+    document.getElementById("chapterEditorModal").close();
+  });
+
+  document.getElementById("chapterEditorForm")?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    saveChapterState();
+  });
+}
+
+function sendTestBibleReminder() {
+  showToast({
+    title: "Prueba de Lectura",
+    body: "¡Funciona! Este es un aviso de prueba para tu lectura diaria de la Biblia.",
+    badge: "Lectura",
+    tone: "success"
+  });
+  if (canUseSystemNotifications()) {
+    notify("Prueba de Lectura", "¡Funciona! Este es un aviso de prueba para tu lectura diaria de la Biblia.");
+  }
+}
+
+function renderBibleBooks() {
+  renderBooksGrid("hebrewScripturesGrid", BIBLE_BOOKS.hebreoarameas);
+  renderBooksGrid("greekScripturesGrid", BIBLE_BOOKS.griegas);
+  renderBibleHistoryTable();
+}
+
+function renderBooksGrid(gridId, booksList) {
+  const grid = document.getElementById(gridId);
+  if (!grid) return;
+  
+  grid.innerHTML = booksList.map(book => {
+    const totalChapters = book.chapters;
+    const progress = state.bibleStudy.progress[book.name] || {};
+    let readCount = 0;
+    Object.keys(progress).forEach(chap => {
+      if (progress[chap]?.read) readCount++;
+    });
+    
+    let cardClass = "bible-book-card";
+    if (readCount === totalChapters) {
+      cardClass += " all-read";
+    } else if (readCount > 0) {
+      cardClass += " some-read";
+    }
+    
+    return `
+      <button type="button" class="${cardClass}" data-book="${escapeHtml(book.name)}">
+        <span>${escapeHtml(book.name)}</span>
+        <span class="progress-badge">${readCount}/${totalChapters}</span>
+      </button>
+    `;
+  }).join("");
+  
+  grid.querySelectorAll(".bible-book-card").forEach(button => {
+    button.addEventListener("click", () => {
+      const bookName = button.dataset.book;
+      showBookDetails(bookName);
+    });
+  });
+}
+
+function showBookDetails(bookName) {
+  const allBooks = [...BIBLE_BOOKS.hebreoarameas, ...BIBLE_BOOKS.griegas];
+  const book = allBooks.find(b => b.name === bookName);
+  if (!book) return;
+  
+  document.getElementById("bibleBooksView").classList.add("hidden");
+  document.getElementById("bibleBookDetailView").classList.remove("hidden");
+  
+  document.getElementById("selectedBookTitle").textContent = `El libro de ${bookName}`;
+  renderBibleChapters(bookName);
+}
+
+function renderBibleChapters(bookName) {
+  const allBooks = [...BIBLE_BOOKS.hebreoarameas, ...BIBLE_BOOKS.griegas];
+  const book = allBooks.find(b => b.name === bookName);
+  if (!book) return;
+  
+  const totalChapters = book.chapters;
+  const progress = state.bibleStudy.progress[bookName] || {};
+  
+  let readCount = 0;
+  Object.keys(progress).forEach(chap => {
+    if (progress[chap]?.read) readCount++;
+  });
+  
+  const progressText = document.getElementById("selectedBookProgressText");
+  const progressBar = document.getElementById("selectedBookProgressBar");
+  if (progressText && progressBar) {
+    const percent = Math.round((readCount / totalChapters) * 100);
+    progressText.textContent = `${readCount} de ${totalChapters} capítulos leídos (${percent}%)`;
+    progressBar.style.width = `${percent}%`;
+  }
+  
+  const chaptersGrid = document.getElementById("chaptersGrid");
+  if (!chaptersGrid) return;
+  
+  let html = "";
+  for (let chapterNum = 1; chapterNum <= totalChapters; chapterNum++) {
+    const chapProgress = progress[chapterNum] || { read: false, comment: "" };
+    const isRead = !!chapProgress.read;
+    const hasComment = !!chapProgress.comment;
+    
+    let btnClass = "chapter-button";
+    if (isRead) {
+      btnClass += " read";
+    }
+    
+    let iconsHtml = "";
+    if (hasComment || isRead) {
+      iconsHtml = `<div class="chapter-icons">`;
+      if (hasComment) {
+        iconsHtml += `
+          <svg class="chapter-icon-pencil" viewBox="0 0 24 24" style="width:11px; height:11px; fill:currentColor;">
+            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+          </svg>`;
+      }
+      if (isRead) {
+        iconsHtml += `
+          <svg class="chapter-icon-check" viewBox="0 0 24 24" style="width:11px; height:11px; fill:currentColor;">
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+          </svg>`;
+      }
+      iconsHtml += `</div>`;
+    }
+    
+    html += `
+      <button type="button" class="${btnClass}" data-chapter="${chapterNum}">
+        <span>${chapterNum}</span>
+        ${iconsHtml}
+      </button>
+    `;
+  }
+  
+  chaptersGrid.innerHTML = html;
+  
+  chaptersGrid.querySelectorAll(".chapter-button").forEach(button => {
+    button.addEventListener("click", () => {
+      const chapterNum = Number(button.dataset.chapter);
+      openChapterEditor(bookName, chapterNum);
+    });
+  });
+}
+
+function openChapterEditor(bookName, chapterNum) {
+  activeBibleBook = bookName;
+  activeBibleChapter = chapterNum;
+  
+  const bookProgress = state.bibleStudy.progress[bookName] || {};
+  const chapState = bookProgress[chapterNum] || { read: false, comment: "" };
+  
+  document.getElementById("chapterModalBookName").textContent = bookName;
+  document.getElementById("chapterModalTitle").textContent = `Capítulo ${chapterNum}`;
+  document.getElementById("chapterModalReadCheck").checked = !!chapState.read;
+  document.getElementById("chapterModalComment").value = chapState.comment || "";
+  
+  document.getElementById("chapterEditorModal").showModal();
+}
+
+function saveChapterState() {
+  if (!activeBibleBook || !activeBibleChapter) return;
+  
+  const isRead = document.getElementById("chapterModalReadCheck").checked;
+  const comment = document.getElementById("chapterModalComment").value.trim();
+  
+  if (!state.bibleStudy.progress[activeBibleBook]) {
+    state.bibleStudy.progress[activeBibleBook] = {};
+  }
+  
+  state.bibleStudy.progress[activeBibleBook][activeBibleChapter] = {
+    read: isRead,
+    comment: comment,
+    readAt: isRead ? new Date().toISOString() : null
+  };
+  
+  saveState();
+  document.getElementById("chapterEditorModal").close();
+  renderBibleChapters(activeBibleBook);
+  renderBibleHistoryTable();
+  scheduleAllBibleReminders();
+  
+  showToast({
+    title: "Estudio guardado",
+    body: `Se actualizó el Capítulo ${activeBibleChapter} de ${activeBibleBook}.`,
+    tone: "success",
+    badge: "Estudio Bíblico"
+  });
+}
+
+function renderBibleHistoryTable() {
+  const tbody = document.getElementById("bibleHistoryTableBody");
+  if (!tbody) return;
+  
+  const history = [];
+  const progress = state.bibleStudy.progress || {};
+  Object.keys(progress).forEach(bookName => {
+    const chapters = progress[bookName] || {};
+    Object.keys(chapters).forEach(chapNum => {
+      const chap = chapters[chapNum];
+      if (chap && chap.read) {
+        history.push({
+          bookName,
+          chapterNum: Number(chapNum),
+          comment: chap.comment || "",
+          readAt: chap.readAt || new Date().toISOString()
+        });
+      }
+    });
+  });
+  
+  // Ordenar el historial por fecha de lectura de forma descendente
+  history.sort((left, right) => new Date(right.readAt) - new Date(left.readAt));
+  
+  if (history.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Aún no hay capítulos marcados como leídos.</td></tr>`;
+    return;
+  }
+  
+  tbody.innerHTML = history.map(item => {
+    const displayDate = formatDate(toDateInputValue(new Date(item.readAt)));
+    return `
+      <tr>
+        <td>${displayDate}</td>
+        <td><strong>${escapeHtml(item.bookName)}</strong></td>
+        <td>Capítulo ${item.chapterNum}</td>
+        <td>${escapeHtml(item.comment || "Sin comentarios")}</td>
+        <td>
+          <div class="table-actions">
+            <button class="action-button edit" data-action="edit-bible" data-book="${escapeHtml(item.bookName)}" data-chapter="${item.chapterNum}">Editar</button>
+            <button class="action-button delete" data-action="delete-bible" data-book="${escapeHtml(item.bookName)}" data-chapter="${item.chapterNum}">Eliminar</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join("");
+  
+  tbody.querySelectorAll("button[data-action]").forEach(button => {
+    button.addEventListener("click", () => {
+      const { action, book, chapter } = button.dataset;
+      const chapterNum = Number(chapter);
+      if (action === "edit-bible") {
+        openChapterEditor(book, chapterNum);
+      } else if (action === "delete-bible") {
+        removeBibleHistoryEntry(book, chapterNum);
+      }
+    });
+  });
+}
+
+function removeBibleHistoryEntry(bookName, chapterNum) {
+  if (!window.confirm(`Se eliminará el registro de lectura para ${bookName} Capítulo ${chapterNum}. ¿Deseas continuar?`)) {
+    return;
+  }
+  
+  if (state.bibleStudy.progress[bookName] && state.bibleStudy.progress[bookName][chapterNum]) {
+    state.bibleStudy.progress[bookName][chapterNum] = {
+      read: false,
+      comment: "",
+      readAt: null
+    };
+    saveState();
+    renderBibleBooks();
+    
+    // Si la vista de detalle de ese libro está activa, refrescarla también
+    const detailViewHidden = document.getElementById("bibleBookDetailView").classList.contains("hidden");
+    if (!detailViewHidden && activeBibleBook === bookName) {
+      renderBibleChapters(bookName);
+    }
+    
+    scheduleAllBibleReminders();
+    
+    showToast({
+      title: "Registro eliminado",
+      body: `Se eliminó la lectura de ${bookName} Capítulo ${chapterNum}.`,
+      tone: "info",
+      badge: "Estudio Bíblico"
+    });
+  }
+}
+
+function scheduleAllBibleReminders() {
+  if (bibleReminderTimeoutId) {
+    clearTimeout(bibleReminderTimeoutId);
+    bibleReminderTimeoutId = null;
+  }
+  
+  if (!state.bibleStudy.reminderEnabled) {
+    return;
+  }
+  
+  const now = new Date();
+  const todayDate = toDateInputValue(now);
+  const logKey = `bible:reminder:${todayDate}`;
+  
+  const [remHour, remMin] = state.bibleStudy.reminderTime.split(":").map(Number);
+  const targetTime = new Date();
+  targetTime.setHours(remHour, remMin, 0, 0);
+  
+  let readToday = false;
+  const progress = state.bibleStudy.progress || {};
+  Object.keys(progress).forEach(bookName => {
+    const chapters = progress[bookName] || {};
+    Object.keys(chapters).forEach(chapNum => {
+      const chap = chapters[chapNum];
+      if (chap && chap.read && chap.readAt) {
+        const readDate = toDateInputValue(new Date(chap.readAt));
+        if (readDate === todayDate) {
+          readToday = true;
+        }
+      }
+    });
+  });
+  
+  if (readToday || state.reminderLog[logKey] || now.getTime() >= targetTime.getTime()) {
+    targetTime.setDate(targetTime.getDate() + 1);
+  }
+  
+  const delayMs = targetTime.getTime() - now.getTime();
+  
+  bibleReminderTimeoutId = window.setTimeout(() => {
+    checkBibleReadingReminder();
+    scheduleAllBibleReminders();
+  }, delayMs);
+}
+
+function checkBibleReadingReminder() {
+  if (!state.bibleStudy.reminderEnabled) {
+    return;
+  }
+  
+  const now = new Date();
+  const todayDate = toDateInputValue(now);
+  const logKey = `bible:reminder:${todayDate}`;
+  
+  if (state.reminderLog[logKey]) {
+    return;
+  }
+  
+  let readToday = false;
+  const progress = state.bibleStudy.progress || {};
+  Object.keys(progress).forEach(bookName => {
+    const chapters = progress[bookName] || {};
+    Object.keys(chapters).forEach(chapNum => {
+      const chap = chapters[chapNum];
+      if (chap && chap.read && chap.readAt) {
+        const readDate = toDateInputValue(new Date(chap.readAt));
+        if (readDate === todayDate) {
+          readToday = true;
+        }
+      }
+    });
+  });
+  
+  if (readToday) {
+    state.reminderLog[logKey] = new Date().toISOString();
+    saveState();
+    return;
+  }
+  
+  const [remHour, remMin] = state.bibleStudy.reminderTime.split(":").map(Number);
+  const currentHour = now.getHours();
+  const currentMin = now.getMinutes();
+  
+  if (currentHour > remHour || (currentHour === remHour && currentMin >= remMin)) {
+    maybeNotify({
+      title: "Lectura de la Biblia",
+      body: "Recuerda leer al menos un capítulo de la Biblia hoy para mantener tu hábito diario.",
+      badge: "Lectura",
+      tone: "info",
+      logKey: logKey
+    });
+  }
+}
+
