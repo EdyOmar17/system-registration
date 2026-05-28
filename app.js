@@ -18,9 +18,91 @@ const TIME_FORMATTER = new Intl.DateTimeFormat("es-ES", {
 const TOAST_DURATION_MS = 7000;
 const REMINDER_CHECK_INTERVAL_MS = 30 * 1000;
 const REMINDER_MAX_SCHEDULE_MS = 30 * 24 * 60 * 60 * 1000;
+const DB_NAME = "PreachingAppDB";
+const DB_VERSION = 1;
+const STORE_NAME = "reminders";
 const REMINDER_CATCHUP_MS = 36 * 60 * 60 * 1000;
 const DAY_BEFORE_REMINDER_HOUR = 9;
 const RETURN_DAY_REMINDER_HOUR = 8;
+
+// IndexedDB functions for Service Worker access
+async function openDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME, { keyPath: "id" });
+      }
+    };
+  });
+}
+
+async function saveRemindersToIndexedDB(reminders) {
+  try {
+    const db = await openDB();
+    const tx = db.transaction(STORE_NAME, "readwrite");
+    const store = tx.objectStore(STORE_NAME);
+    await Promise.all(reminders.map(reminder => store.put(reminder)));
+    await tx.complete;
+    db.close();
+  } catch (error) {
+    console.error("Error saving reminders to IndexedDB:", error);
+  }
+}
+
+async function clearRemindersFromIndexedDB() {
+  try {
+    const db = await openDB();
+    const tx = db.transaction(STORE_NAME, "readwrite");
+    const store = tx.objectStore(STORE_NAME);
+    await store.clear();
+    await tx.complete;
+    db.close();
+  } catch (error) {
+    console.error("Error clearing reminders from IndexedDB:", error);
+  }
+}
+
+async function syncRemindersToIndexedDB() {
+  const reminders = [];
+
+  // Add followup reminders
+  state.followUps.forEach((followUp) => {
+    getFollowupReminderEvents(followUp).forEach((event) => {
+      reminders.push({
+        id: event.logKey,
+        title: event.title,
+        body: event.body,
+        targetTime: new Date(event.at).toISOString(),
+        enabled: true,
+        lastNotified: state.reminderLog[event.logKey] || null,
+      });
+    });
+  });
+
+  // Add bible study reminder
+  if (state.bibleStudy.reminderEnabled) {
+    const [remHour, remMin] = state.bibleStudy.reminderTime.split(":").map(Number);
+    const today = new Date();
+    const targetTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), remHour, remMin, 0);
+    const todayDate = toDateInputValue(today);
+    const logKey = `bible:reminder:${todayDate}`;
+
+    reminders.push({
+      id: logKey,
+      title: "Lectura de la Biblia",
+      body: "Recuerda leer al menos un capítulo de la Biblia hoy para mantener tu hábito diario.",
+      targetTime: targetTime.toISOString(),
+      enabled: true,
+      lastNotified: state.reminderLog[logKey] || null,
+    });
+  }
+
+  await saveRemindersToIndexedDB(reminders);
+}
 
 const BIBLE_BOOKS = {
   hebreoarameas: [
@@ -698,6 +780,7 @@ function bindReminderActions() {
         badge: "Activadas",
       });
       checkFollowupReminders(true);
+      checkBibleReadingReminder();
     } else {
       showToast({
         title: "Permiso no concedido",
@@ -1210,6 +1293,7 @@ async function handleImportData(event) {
     renderAll();
 
     checkFollowupReminders(false);
+    checkBibleReadingReminder();
 
     showToast({
       title: "Datos importados",
@@ -1664,11 +1748,13 @@ function bindReminderVisibility() {
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
       checkFollowupReminders(false);
+      checkBibleReadingReminder();
     }
   });
 
   window.addEventListener("focus", () => {
     checkFollowupReminders(false);
+    checkBibleReadingReminder();
   });
 }
 
@@ -1799,6 +1885,9 @@ function scheduleAllFollowupReminders() {
       scheduledReminderTimeouts.push(timeoutId);
     });
   });
+
+  // Sync reminders to IndexedDB for Service Worker
+  syncRemindersToIndexedDB();
 }
 
 function startReminderLoop() {
@@ -1808,6 +1897,7 @@ function startReminderLoop() {
 
   reminderIntervalId = window.setInterval(() => {
     checkFollowupReminders(false);
+    checkBibleReadingReminder();
   }, REMINDER_CHECK_INTERVAL_MS);
 }
 
@@ -2314,7 +2404,8 @@ function saveChapterState() {
   renderBibleChapters(activeBibleBook);
   renderBibleHistoryTable();
   scheduleAllBibleReminders();
-  
+  checkBibleReadingReminder();
+
   showToast({
     title: "Estudio guardado",
     body: `Se actualizó el Capítulo ${activeBibleChapter} de ${activeBibleBook}.`,
@@ -2436,11 +2527,14 @@ function scheduleAllBibleReminders() {
   }
   
   const delayMs = targetTime.getTime() - now.getTime();
-  
+
   bibleReminderTimeoutId = window.setTimeout(() => {
     checkBibleReadingReminder();
     scheduleAllBibleReminders();
   }, delayMs);
+
+  // Sync reminders to IndexedDB for Service Worker
+  syncRemindersToIndexedDB();
 }
 
 function checkBibleReadingReminder() {
