@@ -1187,16 +1187,6 @@ body.dark-mode .toast-action {
     width: 100%;
   }
 
-  .card-header.row-wrap {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .filter-inline {
-    width: 100%;
-  }
-
   .summary-chip {
     padding: 12px 14px;
   }
@@ -1296,12 +1286,6 @@ body.dark-mode .toast-action {
 
   .table-wrapper {
     font-size: 0.85rem;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  table {
-    min-width: 600px;
   }
 
   th,
@@ -1316,7 +1300,6 @@ body.dark-mode .toast-action {
 
   .filter-inline {
     flex-direction: column;
-    gap: 10px;
   }
 
   .filter-inline label {
@@ -1326,8 +1309,6 @@ body.dark-mode .toast-action {
   .filter-inline label input,
   .filter-inline label select {
     width: 100%;
-    padding: 10px;
-    font-size: 1rem;
   }
 
   .toast-region {
