@@ -79,25 +79,26 @@ async function syncRemindersToIndexedDB() {
         targetTime: new Date(event.at).toISOString(),
         enabled: true,
         lastNotified: state.reminderLog[event.logKey] || null,
+        type: "followup",
       });
     });
   });
 
-  // Add bible study reminder
+  // Add bible study reminder (daily recurring)
   if (state.bibleStudy.reminderEnabled) {
     const [remHour, remMin] = state.bibleStudy.reminderTime.split(":").map(Number);
-    const today = new Date();
-    const targetTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), remHour, remMin, 0);
-    const todayDate = toDateInputValue(today);
+    const todayDate = toDateInputValue(new Date());
     const logKey = `bible:reminder:${todayDate}`;
 
     reminders.push({
       id: logKey,
       title: "Lectura de la Biblia",
       body: "Recuerda leer al menos un capítulo de la Biblia hoy para mantener tu hábito diario.",
-      targetTime: targetTime.toISOString(),
+      reminderHour: remHour,
+      reminderMinute: remMin,
       enabled: true,
       lastNotified: state.reminderLog[logKey] || null,
+      type: "daily",
     });
   }
 

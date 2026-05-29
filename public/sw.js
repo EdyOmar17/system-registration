@@ -67,24 +67,48 @@ async function checkReminders() {
   for (const reminder of reminders) {
     if (!reminder.enabled) continue;
 
-    const targetTime = new Date(reminder.targetTime);
-    const lastNotified = reminder.lastNotified ? new Date(reminder.lastNotified) : null;
+    if (reminder.type === "daily") {
+      // Handle daily recurring reminders (bible study)
+      const reminderTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), reminder.reminderHour, reminder.reminderMinute, 0);
+      const lastNotified = reminder.lastNotified ? new Date(reminder.lastNotified) : null;
 
-    // Check if it's time to notify
-    if (now >= targetTime && (!lastNotified || lastNotified < targetTime)) {
-      // Show notification
-      await self.registration.showNotification(reminder.title, {
-        body: reminder.body,
-        badge: "./icons/app-icon.svg",
-        icon: "./icons/app-icon.svg",
-        tag: reminder.id,
-        data: {
-          url: "./index.html#seguimiento",
-        },
-      });
+      // Check if it's time to notify (after the reminder time and not notified today)
+      if (now >= reminderTime && (!lastNotified || lastNotified.getDate() !== now.getDate() || lastNotified.getMonth() !== now.getMonth() || lastNotified.getFullYear() !== now.getFullYear())) {
+        // Show notification
+        await self.registration.showNotification(reminder.title, {
+          body: reminder.body,
+          badge: "./icons/app-icon.svg",
+          icon: "./icons/app-icon.svg",
+          tag: reminder.id,
+          data: {
+            url: "./index.html#estudio-biblico",
+          },
+        });
 
-      // Update last notified time
-      await updateReminderLog(reminder.id);
+        // Update last notified time
+        await updateReminderLog(reminder.id);
+      }
+    } else {
+      // Handle one-time reminders (followups)
+      const targetTime = new Date(reminder.targetTime);
+      const lastNotified = reminder.lastNotified ? new Date(reminder.lastNotified) : null;
+
+      // Check if it's time to notify
+      if (now >= targetTime && (!lastNotified || lastNotified < targetTime)) {
+        // Show notification
+        await self.registration.showNotification(reminder.title, {
+          body: reminder.body,
+          badge: "./icons/app-icon.svg",
+          icon: "./icons/app-icon.svg",
+          tag: reminder.id,
+          data: {
+            url: "./index.html#seguimiento",
+          },
+        });
+
+        // Update last notified time
+        await updateReminderLog(reminder.id);
+      }
     }
   }
 }
