@@ -20,44 +20,64 @@ function openDB() {
   });
 }
 
-async function getAllReminders() {
-  try {
-    const db = await openDB();
-    const tx = db.transaction(STORE_NAME, "readonly");
-    const store = tx.objectStore(STORE_NAME);
-    const reminders = await new Promise((resolve, reject) => {
+function getAllReminders() {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const db = await openDB();
+      const tx = db.transaction(STORE_NAME, "readonly");
+      const store = tx.objectStore(STORE_NAME);
       const request = store.getAll();
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
-    await tx.complete;
-    db.close();
-    return reminders;
-  } catch (error) {
-    console.error("Error getting reminders from IndexedDB:", error);
-    return [];
-  }
+
+      request.onsuccess = () => {
+        resolve(request.result);
+      };
+
+      request.onerror = () => {
+        reject(request.error);
+      };
+
+      tx.oncomplete = () => {
+        db.close();
+      };
+
+      tx.onerror = () => {
+        db.close();
+      };
+    } catch (error) {
+      reject(error);
+    }
+  });
 }
 
-async function updateReminderLog(reminderId) {
-  try {
-    const db = await openDB();
-    const tx = db.transaction(STORE_NAME, "readwrite");
-    const store = tx.objectStore(STORE_NAME);
-    const reminder = await new Promise((resolve, reject) => {
-      const request = store.get(reminderId);
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
-    if (reminder) {
-      reminder.lastNotified = new Date().toISOString();
-      await store.put(reminder);
+function updateReminderLog(reminderId) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const db = await openDB();
+      const tx = db.transaction(STORE_NAME, "readwrite");
+      const store = tx.objectStore(STORE_NAME);
+      const getRequest = store.get(reminderId);
+
+      getRequest.onsuccess = () => {
+        const reminder = getRequest.result;
+        if (reminder) {
+          reminder.lastNotified = new Date().toISOString();
+          store.put(reminder);
+        }
+      };
+
+      tx.oncomplete = () => {
+        db.close();
+        resolve();
+      };
+
+      tx.onerror = (event) => {
+        db.close();
+        reject(tx.error || event.target.error);
+      };
+    } catch (error) {
+      reject(error);
     }
-    await tx.complete;
-    db.close();
-  } catch (error) {
-    console.error("Error updating reminder log:", error);
-  }
+  });
 }
 
 async function checkReminders() {
@@ -133,7 +153,7 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const targetUrl = new URL("./index.html#seguimiento", self.location.href).href;
+  const targetUrl = event.notification.data?.url || "./index.html#seguimiento";
 
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {

@@ -40,30 +40,54 @@ async function openDB() {
   });
 }
 
-async function saveRemindersToIndexedDB(reminders) {
-  try {
-    const db = await openDB();
-    const tx = db.transaction(STORE_NAME, "readwrite");
-    const store = tx.objectStore(STORE_NAME);
-    await Promise.all(reminders.map(reminder => store.put(reminder)));
-    await tx.complete;
-    db.close();
-  } catch (error) {
-    console.error("Error saving reminders to IndexedDB:", error);
-  }
+function saveRemindersToIndexedDB(reminders) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const db = await openDB();
+      const tx = db.transaction(STORE_NAME, "readwrite");
+      const store = tx.objectStore(STORE_NAME);
+
+      tx.oncomplete = () => {
+        db.close();
+        resolve();
+      };
+
+      tx.onerror = (event) => {
+        db.close();
+        reject(tx.error || event.target.error);
+      };
+
+      reminders.forEach((reminder) => {
+        store.put(reminder);
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
 }
 
-async function clearRemindersFromIndexedDB() {
-  try {
-    const db = await openDB();
-    const tx = db.transaction(STORE_NAME, "readwrite");
-    const store = tx.objectStore(STORE_NAME);
-    await store.clear();
-    await tx.complete;
-    db.close();
-  } catch (error) {
-    console.error("Error clearing reminders from IndexedDB:", error);
-  }
+function clearRemindersFromIndexedDB() {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const db = await openDB();
+      const tx = db.transaction(STORE_NAME, "readwrite");
+      const store = tx.objectStore(STORE_NAME);
+
+      tx.oncomplete = () => {
+        db.close();
+        resolve();
+      };
+
+      tx.onerror = (event) => {
+        db.close();
+        reject(tx.error || event.target.error);
+      };
+
+      store.clear();
+    } catch (error) {
+      reject(error);
+    }
+  });
 }
 
 async function syncRemindersToIndexedDB() {
@@ -316,12 +340,10 @@ function initializeDefaults() {
 function syncFilterInputsFromState() {
   const currentMonth = toMonthValue(new Date());
 
-  if (!state.filters.preachingMonth) {
-    state.filters.preachingMonth = currentMonth;
-  }
-  if (!state.filters.creditMonth) {
-    state.filters.creditMonth = currentMonth;
-  }
+  state.filters.preachingMonth = currentMonth;
+  state.filters.creditMonth = currentMonth;
+  state.filters.preachingWeek = "";
+  state.filters.creditWeek = "";
 
   document.getElementById("preachingMonthFilter").value = state.filters.preachingMonth;
   document.getElementById("preachingWeekFilter").value = state.filters.preachingWeek;
@@ -632,7 +654,7 @@ function upsertPreachingRecord({ editingId, date, hours, shift }) {
 
   const existing = editingId ? state.preachingRecords.find((item) => item.id === editingId) : null;
   const record = {
-    id: editingId || crypto.randomUUID(),
+    id: editingId || generateUUID(),
     date,
     hours,
     shift,
@@ -658,7 +680,7 @@ function upsertCreditRecord({ editingId, date, hours }) {
 
   const existing = editingId ? state.creditRecords.find((item) => item.id === editingId) : null;
   const record = {
-    id: editingId || crypto.randomUUID(),
+    id: editingId || generateUUID(),
     date,
     hours,
     createdAt: existing?.createdAt || new Date().toISOString(),
@@ -1366,7 +1388,7 @@ function handleFollowupSubmit(event) {
   event.preventDefault();
 
   const followUp = {
-    id: state.editing.followupId || crypto.randomUUID(),
+    id: state.editing.followupId || generateUUID(),
     name: document.getElementById("followupName").value.trim(),
     address: document.getElementById("followupAddress").value.trim(),
     notes: document.getElementById("followupNotes").value.trim(),
@@ -2177,6 +2199,13 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
+}
+
+function generateUUID() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return "id-" + Date.now().toString(36) + "-" + Math.random().toString(36).substring(2, 9);
 }
 
 /* --- Bible Study Logic --- */
