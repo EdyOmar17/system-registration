@@ -222,7 +222,7 @@ document.addEventListener("DOMContentLoaded", () => {
   bindFilters();
   bindMonthlyGoal();
   bindDayEditor();
-  bindReminderActions();
+  bindReportActions();
   bindReminderVisibility();
   bindDataBackup();
   bindTableActions();
@@ -778,44 +778,20 @@ function bindFilters() {
   });
 }
 
-function bindReminderActions() {
-  document.getElementById("enableNotifications").addEventListener("click", async () => {
-    if (!("Notification" in window)) {
-      showToast({
-        title: "Navegador no compatible",
-        body: "Este navegador no admite notificaciones del sistema, pero los avisos internos siguen activos.",
-        tone: "warning",
-        badge: "Aviso interno",
-      });
-      renderNotificationStatus();
-      return;
-    }
-
-    const permission = await Notification.requestPermission();
-    renderNotificationStatus();
-
-    if (permission === "granted") {
-      notify("Notificaciones activadas", "Recibiras recordatorios en la app y tambien desde el navegador.");
-      showToast({
-        title: "Notificaciones activadas",
-        body: "Ya quedo habilitado el permiso del navegador. Los avisos internos y del sistema estan activos.",
-        tone: "success",
-        badge: "Activadas",
-      });
-      checkFollowupReminders(true);
-      checkBibleReadingReminder();
-    } else {
-      showToast({
-        title: "Permiso no concedido",
-        body: "Seguiremos mostrando recordatorios dentro de la web con el mismo estilo visual.",
-        tone: permission === "denied" ? "warning" : "info",
-        badge: "Aviso interno",
-      });
-    }
-  });
-
-  document.getElementById("checkRemindersNow").addEventListener("click", () => {
-    checkFollowupReminders(true);
+function bindReportActions() {
+  document.getElementById("sendReportWhatsApp")?.addEventListener("click", () => {
+    const monthValue = getActiveMonthValue();
+    const combinedTotal = getCombinedMonthHours(monthValue);
+    const followupsForMonth = getFollowupsForMonth(monthValue);
+    const estudiosCount = followupsForMonth.filter((f) => f.type === "estudio biblico").length;
+    
+    const [, month] = monthValue.split("-");
+    const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    const monthName = monthNames[parseInt(month, 10) - 1] || monthValue;
+    
+    const message = `Informe del mes de ${monthName}:\nHoras: ${formatHours(combinedTotal)}\nEstudios: ${estudiosCount}\n\nSaludos`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, "_blank");
   });
 }
 
@@ -2211,40 +2187,6 @@ function generateUUID() {
 /* --- Bible Study Logic --- */
 
 function bindBibleStudy() {
-  const reminderCheckbox = document.getElementById("bibleReminderCheckbox");
-  const reminderTimeInput = document.getElementById("bibleReminderTime");
-  const testReminderButton = document.getElementById("testBibleReminderButton");
-
-  if (reminderCheckbox && reminderTimeInput) {
-    reminderCheckbox.checked = state.bibleStudy.reminderEnabled;
-    reminderTimeInput.value = state.bibleStudy.reminderTime;
-    
-    reminderCheckbox.addEventListener("change", (e) => {
-      state.bibleStudy.reminderEnabled = e.target.checked;
-      saveState();
-      renderNotificationStatus();
-      scheduleAllBibleReminders();
-    });
-    
-    reminderTimeInput.addEventListener("change", (e) => {
-      state.bibleStudy.reminderTime = e.target.value;
-      saveState();
-      scheduleAllBibleReminders();
-    });
-  }
-
-  if (testReminderButton) {
-    testReminderButton.addEventListener("click", () => {
-      if ("Notification" in window && Notification.permission === "default") {
-        Notification.requestPermission().then(() => {
-          renderNotificationStatus();
-          sendTestBibleReminder();
-        });
-      } else {
-        sendTestBibleReminder();
-      }
-    });
-  }
 
   document.getElementById("backToBooksButton")?.addEventListener("click", () => {
     document.getElementById("bibleBookDetailView").classList.add("hidden");
@@ -2520,99 +2462,10 @@ function removeBibleHistoryEntry(bookName, chapterNum) {
 }
 
 function scheduleAllBibleReminders() {
-  if (bibleReminderTimeoutId) {
-    clearTimeout(bibleReminderTimeoutId);
-    bibleReminderTimeoutId = null;
-  }
-  
-  if (!state.bibleStudy.reminderEnabled) {
-    return;
-  }
-  
-  const now = new Date();
-  const todayDate = toDateInputValue(now);
-  const logKey = `bible:reminder:${todayDate}`;
-  
-  const [remHour, remMin] = state.bibleStudy.reminderTime.split(":").map(Number);
-  const targetTime = new Date();
-  targetTime.setHours(remHour, remMin, 0, 0);
-  
-  let readToday = false;
-  const progress = state.bibleStudy.progress || {};
-  Object.keys(progress).forEach(bookName => {
-    const chapters = progress[bookName] || {};
-    Object.keys(chapters).forEach(chapNum => {
-      const chap = chapters[chapNum];
-      if (chap && chap.read && chap.readAt) {
-        const readDate = toDateInputValue(new Date(chap.readAt));
-        if (readDate === todayDate) {
-          readToday = true;
-        }
-      }
-    });
-  });
-  
-  if (readToday || state.reminderLog[logKey] || now.getTime() >= targetTime.getTime()) {
-    targetTime.setDate(targetTime.getDate() + 1);
-  }
-  
-  const delayMs = targetTime.getTime() - now.getTime();
-
-  bibleReminderTimeoutId = window.setTimeout(() => {
-    checkBibleReadingReminder();
-    scheduleAllBibleReminders();
-  }, delayMs);
-
-  // Sync reminders to IndexedDB for Service Worker
-  syncRemindersToIndexedDB();
+  // Funcionalidad eliminada
 }
 
 function checkBibleReadingReminder() {
-  if (!state.bibleStudy.reminderEnabled) {
-    return;
-  }
-  
-  const now = new Date();
-  const todayDate = toDateInputValue(now);
-  const logKey = `bible:reminder:${todayDate}`;
-  
-  if (state.reminderLog[logKey]) {
-    return;
-  }
-  
-  let readToday = false;
-  const progress = state.bibleStudy.progress || {};
-  Object.keys(progress).forEach(bookName => {
-    const chapters = progress[bookName] || {};
-    Object.keys(chapters).forEach(chapNum => {
-      const chap = chapters[chapNum];
-      if (chap && chap.read && chap.readAt) {
-        const readDate = toDateInputValue(new Date(chap.readAt));
-        if (readDate === todayDate) {
-          readToday = true;
-        }
-      }
-    });
-  });
-  
-  if (readToday) {
-    state.reminderLog[logKey] = new Date().toISOString();
-    saveState();
-    return;
-  }
-  
-  const [remHour, remMin] = state.bibleStudy.reminderTime.split(":").map(Number);
-  const currentHour = now.getHours();
-  const currentMin = now.getMinutes();
-  
-  if (currentHour > remHour || (currentHour === remHour && currentMin >= remMin)) {
-    maybeNotify({
-      title: "Lectura de la Biblia",
-      body: "Recuerda leer al menos un capítulo de la Biblia hoy para mantener tu hábito diario.",
-      badge: "Lectura",
-      tone: "info",
-      logKey: logKey
-    });
-  }
+  // Funcionalidad eliminada
 }
 

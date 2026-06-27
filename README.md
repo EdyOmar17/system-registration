@@ -9,7 +9,7 @@ Este proyecto permite a los usuarios llevar un control personal de su actividad 
 - **Modo oscuro completo**: Toggle para cambiar entre tema claro y oscuro con transiciones suaves y estilos optimizados para todos los componentes UI
 - **Registro de actividades**: Predicación, horas de crédito, revisitas y estudios bíblicos
 - **Estudio de la Biblia**: Seguimiento de lectura de libros y capítulos con notas y comentarios
-- **Recordatorios automáticos**: Notificaciones para revisitas y estudios bíblicos
+- **Envío de Informe (WhatsApp)**: Envía tu total combinado de horas y cantidad de estudios automáticamente por WhatsApp
 - **Historial completo**: Tablas con historial de registros en todas las secciones
 - **Modal de confirmación**: Diálogos personalizados para eliminaciones en lugar de alertas nativas
 - **Exportación e importación**: Generación de informes PDF y respaldos JSON
@@ -20,7 +20,7 @@ Este proyecto permite a los usuarios llevar un control personal de su actividad 
 
 - Registra actividades de predicación y seguimiento.
 - Guarda la información localmente en el navegador sin servidor.
-- Genera reportes en PDF por mes.
+- Genera reportes en PDF por mes o los envía resumidos vía WhatsApp.
 - Permite exportar los datos completos a un archivo JSON.
 - Permite importar un JSON para restaurar los datos.
 - Es ideal para uso personal o en pequeños grupos sin necesidad de base de datos.
@@ -100,10 +100,11 @@ Abre la URL que muestra Vite (por ejemplo `http://localhost:5173`).
 3. Ingresa tu nombre, fecha y el tipo de actividad (predicación, crédito, revisita o estudio bíblico).
 4. Guarda el registro y revisa el historial en la misma página.
 5. Para eliminar registros, usa los botones de Editar/Eliminar en el historial (se mostrará un modal de confirmación).
-6. Usa el botón de exportar PDF para generar un reporte del mes.
-7. Usa el botón de exportar JSON para hacer una copia de seguridad de todos los datos.
-8. Para restaurar datos, importa un archivo JSON válido desde el botón de importación.
-9. En la sección de Estudio de la Biblia, marca capítulos como leídos y agrega notas personales.
+6. Usa el botón "Enviar informe por WhatsApp" en la sección de Revisitas para mandar tus horas y estudios del mes de forma rápida.
+7. Usa el botón de exportar PDF para generar un reporte detallado del mes.
+8. Usa el botón de exportar JSON para hacer una copia de seguridad de todos los datos.
+9. Para restaurar datos, importa un archivo JSON válido desde el botón de importación.
+10. En la sección de Estudio de la Biblia, marca capítulos como leídos y agrega notas personales.
 
 ## Despliegue en Render (sitio estático)
 

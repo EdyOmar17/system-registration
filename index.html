@@ -328,23 +328,23 @@
           <article class="card">
             <div class="card-header">
               <div>
-                <p class="card-kicker">Recordatorios</p>
-                <h2>Notificaciones automáticas</h2>
+                <p class="card-kicker">Reporte</p>
+                <h2>Envio de Informe</h2>
               </div>
             </div>
 
             <div class="notification-panel">
               <p>
-                Recordatorios de revisitas: el dia anterior (9:00), el dia del regreso (8:00) y a la hora
-                exacta del regreso. Activa los avisos del navegador y manten la pagina abierta o en segundo plano.
+                Envia tu informe mensual directamente por WhatsApp.
               </p>
-              <div class="notification-status" aria-live="polite">
-                <span class="status-pill" id="notificationStatusPill">Internas activas</span>
-                <p id="notificationStatusText">Los recordatorios visuales ya estan activos dentro de la app.</p>
-              </div>
               <div class="form-actions">
-                <button type="button" id="enableNotifications" class="primary-button">Activar avisos del navegador</button>
-                <button type="button" id="checkRemindersNow" class="secondary-button">Comprobar recordatorios</button>
+                <button type="button" id="sendReportWhatsApp" class="primary-button">Enviar informe por WhatsApp</button>
+              </div>
+              <div class="info-box" style="margin-top: 1rem;">
+                <strong>Importante</strong>
+                <p>
+                  Al presionar el boton, se generara un mensaje automatico con tu total de horas (Total combinado) y los estudios de este mes. El mensaje se abrira en WhatsApp listo para que lo envies al destinatario que elijas.
+                </p>
               </div>
               <div class="info-box">
                 <strong>Informe y respaldo</strong>
@@ -406,14 +406,7 @@
                 <p class="card-kicker">Progreso espiritual</p>
                 <h2>Estudio de la Biblia</h2>
               </div>
-              <div class="info-box install-note" style="margin: 0; padding: 10px 14px; border-radius: 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.9rem; cursor: pointer; color: var(--text);">
-                  <input type="checkbox" id="bibleReminderCheckbox" style="width: auto; margin: 0;">
-                  <span>Recordatorio diario</span>
-                </label>
-                <input type="time" id="bibleReminderTime" value="20:00" style="padding: 4px 8px; border-radius: 8px; width: auto; display: inline-block; font-size: 0.85rem;">
-                <button type="button" id="testBibleReminderButton" class="secondary-button" style="padding: 6px 10px; font-size: 0.8rem; border-radius: 8px; margin: 0;">Probar aviso</button>
-              </div>
+
             </div>
             <p class="hero-text" style="margin-bottom: 20px;">
               Selecciona un libro para ver sus capítulos, registrar lecturas y guardar tus notas o comentarios personales.
